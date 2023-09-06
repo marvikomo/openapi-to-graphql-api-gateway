@@ -2,19 +2,18 @@ swagger: '2.0'
 
 info:
   version: 1.0.0
-  title: "Myasoebi Authentication Service API"
+  title: "TEST"
   description: |
-    Myasoebi Authentication servive API endpoints
-    This service generates auth tokens for users and internal services.
+    TEST
   contact:
-    name: "Nyasoebi"
-    email: "dev@myasoebi.com"
+    name: "test"
+    email: "devtest.com"
 
-x-service-id: authentication
-x-organization: core
+x-service-id: test
+x-organization: marv
 
 basePath: /
-host: authentication.core.myasoebi.com
+host: test.com
 schemes:
   - "https"
 
@@ -44,7 +43,7 @@ paths:
   /users/tokens:
     post:
       x-scopes:
-        - 'svcs.authentication.user-token-generate'
+        - 'test-token'
       security:
         - authToken: [ ]
       tags:
@@ -62,215 +61,6 @@ paths:
           description: "Success"
           schema:
             $ref: "#/definitions/UserTokenResponse"
-        "400":
-          description: "Bad request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "401":
-          description: "Unathorized request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "402":
-          description: "Request failed"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "404":
-          description: "Resource not found"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "500":
-          description: "Server error"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-
-  /users/tokens/validate:
-    post:
-      tags:
-        - "Users"
-      summary: "Checks if a user token has been invalidated"
-      operationId: validateUserToken
-      security: [ ]
-      parameters:
-        - in: "body"
-          name: "body"
-          description: Request object for validating a user token.
-          required: true
-          schema:
-            $ref: "#/definitions/UserTokenSessionDto"
-      responses:
-        "200":
-          description: "Token validation completed"
-          schema:
-            $ref: "./common.yaml#/components/schemas/StatusDto"
-        "400":
-          description: "Bad request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "401":
-          description: "Unathorized request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "402":
-          description: "Request failed"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "404":
-          description: "Resource not found"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "500":
-          description: "Server error"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-
-  /users/tokens/invalidate:
-    post:
-      x-scopes:
-        - 'svcs.authentication.user-token-invalidate'
-      security:
-        - authToken: [ ]
-      tags:
-        - "Users"
-      summary: "Invalidates a user token"
-      operationId: invalidateUserToken
-      parameters:
-        - in: "body"
-          name: "body"
-          description: Request object for invalidating a user token session.
-          required: true
-          schema:
-            $ref: "#/definitions/UserTokenSessionDto"
-      responses:
-        "200":
-          description: "Success"
-          schema:
-            $ref: "./common.yaml#/components/schemas/StatusDto"
-        "400":
-          description: "Bad request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "401":
-          description: "Unathorized request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "402":
-          description: "Request failed"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "404":
-          description: "Resource not found"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "500":
-          description: "Server error"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-
-  /services:
-    post:
-      security:
-        - basicAuth: [ ]
-      summary: "Create a service"
-      tags:
-        - "Service Admin"
-      operationId: createService
-      parameters:
-        - in: "body"
-          name: "body"
-          required: true
-          schema:
-            $ref: "#/definitions/CreateServiceRequest"
-      responses:
-        "200":
-          description: "Success"
-          schema:
-            $ref: "#/definitions/ServiceCreated"
-        "400":
-          description: "Bad request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "401":
-          description: "Unathorized request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "402":
-          description: "Request failed"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "404":
-          description: "Resource not found"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "500":
-          description: "Server error"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-
-  /services/scopes:
-    post:
-      security:
-        - basicAuth: [ ]
-      summary: "Updates service scopes"
-      operationId: updateServiceScopes
-      tags:
-        - "Service Admin"
-      parameters:
-        - in: "body"
-          name: "body"
-          required: true
-          schema:
-            $ref: "#/definitions/ScopeUpdateRequest"
-      responses:
-        "200":
-          description: "Success"
-          schema:
-            $ref: "#/definitions/ScopesUpdateDto"
-        "400":
-          description: "Bad request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "401":
-          description: "Unathorized request"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "402":
-          description: "Request failed"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "404":
-          description: "Resource not found"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "500":
-          description: "Server error"
-          schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-
-  /services/token:
-    post:
-      security:
-        - basicAuth: [ ]
-      operationId: generateServiceToken
-      tags:
-        - "Services"
-      summary: "Generates a service token"
-      description: |
-        Services need to generate an auth token in order to communicate with other services,
-        in order to do this, the service credentials generated from calling `POST /services` need to be used.
-        The `serviceId` (or authId) should be set as the username.
-        The `secret` (or authSecret) should be set as the password.
-        The generated token can then be used to communicate with other services.
-      parameters:
-        - in: "body"
-          name: "body"
-          required: true
-          schema:
-            $ref: "#/definitions/ServiceTokenRequest"
-      responses:
-        "200":
-          description: "Returns service token"
-          schema:
-            $ref: "#/definitions/ServiceToken"
         "400":
           description: "Bad request"
           schema:

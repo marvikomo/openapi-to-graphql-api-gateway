@@ -1,0 +1,500 @@
+swagger: '2.0'
+
+info:
+  version: 1.0.0
+  title: "Myasoebi Authentication Service API"
+  description: |
+    Myasoebi Authentication servive API endpoints
+    This service generates auth tokens for users and internal services.
+  contact:
+    name: "Nyasoebi"
+    email: "dev@myasoebi.com"
+
+x-service-id: authentication
+x-organization: core
+
+basePath: /
+host: authentication.core.myasoebi.com
+schemes:
+  - "https"
+
+securityDefinitions:
+  authToken:
+    type: apiKey
+    name: "x-auth-token"
+    in: header
+
+  basicAuth:
+    type: basic
+
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+tags:
+  - name: Users
+    description: "User related endpoints"
+  - name: Services
+    description: "Service related endpoints"
+  - name: Service Admin
+    description: "Endpoints for creating and managing services, accessible to ADMIN"
+
+paths:
+  /users/tokens:
+    post:
+      x-scopes:
+        - 'svcs.authentication.user-token-generate'
+      security:
+        - authToken: [ ]
+      tags:
+        - "Users"
+      summary: "Generates a user token"
+      operationId: generateUserAuthToken
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/UserTokenRequest"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/UserTokenResponse"
+        "400":
+          description: "Bad request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "401":
+          description: "Unathorized request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "402":
+          description: "Request failed"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "404":
+          description: "Resource not found"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "500":
+          description: "Server error"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+
+  /users/tokens/validate:
+    post:
+      tags:
+        - "Users"
+      summary: "Checks if a user token has been invalidated"
+      operationId: validateUserToken
+      security: [ ]
+      parameters:
+        - in: "body"
+          name: "body"
+          description: Request object for validating a user token.
+          required: true
+          schema:
+            $ref: "#/definitions/UserTokenSessionDto"
+      responses:
+        "200":
+          description: "Token validation completed"
+          schema:
+            $ref: "./common.yaml#/components/schemas/StatusDto"
+        "400":
+          description: "Bad request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "401":
+          description: "Unathorized request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "402":
+          description: "Request failed"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "404":
+          description: "Resource not found"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "500":
+          description: "Server error"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+
+  /users/tokens/invalidate:
+    post:
+      x-scopes:
+        - 'svcs.authentication.user-token-invalidate'
+      security:
+        - authToken: [ ]
+      tags:
+        - "Users"
+      summary: "Invalidates a user token"
+      operationId: invalidateUserToken
+      parameters:
+        - in: "body"
+          name: "body"
+          description: Request object for invalidating a user token session.
+          required: true
+          schema:
+            $ref: "#/definitions/UserTokenSessionDto"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "./common.yaml#/components/schemas/StatusDto"
+        "400":
+          description: "Bad request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "401":
+          description: "Unathorized request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "402":
+          description: "Request failed"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "404":
+          description: "Resource not found"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "500":
+          description: "Server error"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+
+  /services:
+    post:
+      security:
+        - basicAuth: [ ]
+      summary: "Create a service"
+      tags:
+        - "Service Admin"
+      operationId: createService
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/CreateServiceRequest"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/ServiceCreated"
+        "400":
+          description: "Bad request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "401":
+          description: "Unathorized request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "402":
+          description: "Request failed"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "404":
+          description: "Resource not found"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "500":
+          description: "Server error"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+
+  /services/scopes:
+    post:
+      security:
+        - basicAuth: [ ]
+      summary: "Updates service scopes"
+      operationId: updateServiceScopes
+      tags:
+        - "Service Admin"
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/ScopeUpdateRequest"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/ScopesUpdateDto"
+        "400":
+          description: "Bad request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "401":
+          description: "Unathorized request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "402":
+          description: "Request failed"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "404":
+          description: "Resource not found"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "500":
+          description: "Server error"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+
+  /services/token:
+    post:
+      security:
+        - basicAuth: [ ]
+      operationId: generateServiceToken
+      tags:
+        - "Services"
+      summary: "Generates a service token"
+      description: |
+        Services need to generate an auth token in order to communicate with other services,
+        in order to do this, the service credentials generated from calling `POST /services` need to be used.
+        The `serviceId` (or authId) should be set as the username.
+        The `secret` (or authSecret) should be set as the password.
+        The generated token can then be used to communicate with other services.
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/ServiceTokenRequest"
+      responses:
+        "200":
+          description: "Returns service token"
+          schema:
+            $ref: "#/definitions/ServiceToken"
+        "400":
+          description: "Bad request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "401":
+          description: "Unathorized request"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "402":
+          description: "Request failed"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "404":
+          description: "Resource not found"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+        "500":
+          description: "Server error"
+          schema:
+            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+
+definitions:
+
+  UserTokenSessionDto:
+    type: "object"
+    required:
+      - userId
+    properties:
+      sessionId:
+        type: "string"
+        format: "uuid"
+        description: "Session identifier (uuid)"
+      userId:
+        type: "string"
+        format: "uuid"
+        description: "User identifier (uuid)"
+
+  UserTokenRequest:
+    type: "object"
+    required:
+      - userId
+      - scopes
+      - ttl
+    properties:
+      userId:
+        type: "string"
+        format: "uuid"
+        description: "User's unique identifier."
+      scopes:
+        type: "array"
+        description: "Scopes you'd like this token to have."
+        minItems: 0
+        items:
+          type: "string"
+          pattern: "^users\\."
+          example: "users.global.full-login"
+      ttl:
+        type: "integer"
+        format: int64
+        example: 3600
+        description: "Time to live in seconds"
+      payload:
+        type: "object"
+        example:
+          some_property: "value"
+          another_property: "value2"
+      isOneTime:
+        type: boolean
+        description: |
+          Indicates if the token is for one-time use. A one-time use token can only be once.
+          Subsequent validations will return false.
+        default: false
+      deviceIdentifier:
+        type: string
+        description: An arbritrary string to identify device where session was created. It is embedded in the payload
+        default: unknown_device
+
+
+  ServiceTokenRequest:
+    type: "object"
+    properties:
+      payload:
+        type: "object"
+        example:
+          some_property: "value"
+          another_property: "value2"
+
+  CreateServiceRequest:
+    type: "object"
+    required:
+      - scopes
+      - audience
+      - description
+      - sourceServiceId
+    properties:
+      description:
+        type: "string"
+        description: "Service description"
+        example: "Short description of service"
+      audience:
+        type: string
+        description: |
+          The audience that tokens generated by this service are meant for, should be the organization by default.
+        example: guildos
+      sourceServiceId:
+        type: string
+        description: |
+          The ID of the service, not to be confused with authServiceId which is returned after
+          a service credential is created.
+        example: users
+      scopes:
+        type: "array"
+        description: "Scopes to be included in service token"
+        minItems: 0
+        items:
+          pattern: "^svcs\\."
+          type: "string"
+          example: "svcs.*"
+
+  ScopeUpdateRequest:
+    type: "object"
+    required:
+      - serviceId
+      - scopes
+    properties:
+      serviceId:
+        type: "string"
+        format: "uuid"
+      scopes:
+        type: "array"
+        minItems: 0
+        items:
+          pattern: "^svcs\\."
+          type: "string"
+          example: "svcs.*"
+
+  UserTokenResponse:
+    type: "object"
+    required:
+      - userId
+      - token
+      - sessionId
+    properties:
+      userId:
+        type: "string"
+        description: "User ID"
+        format: "uuid"
+      sessionId:
+        type: string
+        format: uuid
+        description: session attached to this token, can be used to invalidate token
+      token:
+        type: "string"
+        description: "User JWT token"
+      scopes:
+        type: "array"
+        description: "Scopes included in the token"
+        items:
+          type: "string"
+          example: "auth.*"
+      createdAt:
+        $ref: "./common.yaml#/components/schemas/Timestamp"
+      expiresAt:
+        $ref: "./common.yaml#/components/schemas/Timestamp"
+
+  ServiceToken:
+    type: "object"
+    required:
+      - serviceId
+      - token
+      - scopes
+    properties:
+      serviceId:
+        type: "string"
+        format: "uuid"
+        description: "Service Identifier"
+      token:
+        type: "string"
+        description: "Service token"
+      scopes:
+        type: "array"
+        description: "Scopes inlcuded in token"
+        items:
+          type: "string"
+      createdAt:
+        $ref: './common.yaml#/components/schemas/Timestamp'
+      expiresAt:
+        $ref: './common.yaml#/components/schemas/Timestamp'
+
+  ServiceCreated:
+    type: "object"
+    properties:
+      serviceId:
+        type: "string"
+        format: "uuid"
+      audience:
+        type: "string"
+        description: "A URI string pointing to the service owner"
+      scopes:
+        type: "array"
+        description: "Service scopes"
+        items:
+          type: "string"
+      secret:
+        type: "string"
+        description: "Service secret key. This key can be used along with your serviceId to generate a service token."
+        example: "SERVICE_SECRET"
+      createdAt:
+        $ref: "./common.yaml#/components/schemas/Timestamp"
+      updatedAt:
+        $ref: "./common.yaml#/components/schemas/Timestamp"
+
+  ScopesUpdateDto:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+        example: "success"
+      serviceId:
+        type: "string"
+        format: "uuid"
+      scopes:
+        type: "array"
+        items:
+          type: "string"
+      updatedAt:
+        $ref: "./common.yaml#/components/schemas/Timestamp"

@@ -1,8 +1,18 @@
 import fs, {PathOrFileDescriptor} from 'fs'
 import {parse} from "yaml"
-import fetch, {Response} from 'node-fetch';
+import {convertObj} from 'swagger2openapi';
+const oasValidator = require('oas-validator');
 
 
+type Oas2 = {
+    swagger: string,
+    [key: string]: any
+}
+
+type Oas3 = {
+    openapi: string,
+    [key: string]: any
+}
 export const loadYaml = (path: PathOrFileDescriptor, encoding: BufferEncoding = 'utf8') => {
     const spec = fs.readFileSync(path, encoding);
     if(!spec) throw new Error("No valid specification");
@@ -12,28 +22,27 @@ export const loadYaml = (path: PathOrFileDescriptor, encoding: BufferEncoding = 
 const isOas2 = (specs: any) => specs.swagger && specs.swagger.startsWith('2');
 const isOas3 = (specs: any) => specs.openapi && specs.openapi.startsWith('3');
 
-const CONVERTER_URL: string = 'https://converter.swagger.io/api/convert';
 
-export const convertToOas3 = async (specs: any): Promise<any> => {
-if(isOas2(specs)){
-    const response: Response = await fetch(CONVERTER_URL, {
-        method: 'post',
-        body: JSON.stringify(specs),
-        headers: {'Content-type': 'application/json'}
-    });
-    
-     if(response.ok) return await response.json();
-    
-     throw new Error("Failed to convert");
-}else{
-    return specs;
+export const convertToOas3 = async (specs: any): Promise<Oas3> => {
+    try{
+       const {openapi} =  await convertObj(specs, {});
+       return openapi;
+    }catch(err: any) {
+        throw new Error(`could not convert swagger to openapi - ${err.message}`)
+    }
 }
+
+const validateOas = async (specs) => {
 
 }
 
-function validateSpec(spec: any) {
-  
+//return oas3 validated specs
+function validatedSpecs(specs: any) {
+    try{
+        if(isOas2(specs)) {
+          return 
+        }
 
-    
+    }
 }
 

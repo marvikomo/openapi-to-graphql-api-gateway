@@ -1,290 +1,990 @@
-swagger: '2.0'
-
+openapi: 3.0.0
 info:
+  title: 'Myasoebi Backend Service'
+  description: 'This service provides endpoints for all related interactions'
   version: 1.0.0
-  title: "TEST"
-  description: |
-    TEST
   contact:
-    name: "test"
-    email: "devtest.com"
+    name: 'Marvelous'
+    email: 'marv@myasoebi.com'
 
-x-service-id: test
-x-organization: marv
+x-organization: myasoebi
+x-service-id: backend
 
-basePath: /
-host: test.com
-schemes:
-  - "https"
-
-securityDefinitions:
-  authToken:
-    type: apiKey
-    name: "x-auth-token"
-    in: header
-
-  basicAuth:
-    type: basic
-
-consumes:
-  - "application/json"
-produces:
-  - "application/json"
+servers:
+  - description: Staging Ingress
+    url: https://myasoebi.com
 
 tags:
-  - name: Users
-    description: "User related endpoints"
-  - name: Services
-    description: "Service related endpoints"
-  - name: Service Admin
-    description: "Endpoints for creating and managing services, accessible to ADMIN"
+  - name: onboarding
+    description: 'User onboarding related endpoints'
+  - name: auth
+    description: 'auth related endpoints'
+  - name: cart
+    description: 'cart related endpoints'
+  - name: booking
+    description: 'booking related endpoints'
+  - name: category
+    description: 'category related endpoints'
+  - name: product
+    description: 'Product related endpoints'
+
+security:
+  - bearerToken: []
 
 paths:
-  /users/tokens:
+  /onboarding/:
     post:
-      x-scopes:
-        - 'test-token'
-      security:
-        - authToken: [ ]
+      summary: 'Endpoint to signup users'
+      operationId: registerUser
+      x-visibility: public
       tags:
-        - "Users"
-      summary: "Generates a user token"
-      operationId: generateUserAuthToken
+        - 'onboarding'
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignup'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /auth/login:
+    post:
+      summary: 'Endpoint to login users'
+      operationId: loginUser
+      x-visibility: public
+      tags:
+        - 'auth'
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /auth/verify-otp:
+    post:
+      summary: 'Endpoint to verify OTP'
+      operationId: verifyOtp
+      x-visibility: public
+      tags:
+        - 'auth'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOTP'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyOTPResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /cart/items:
+    post:
+      summary: 'Add Item to Cart'
+      description: Adds a new item to the user's cart
+      x-visibility: public
+      operationId: addItemToCart
+      tags:
+        - 'cart'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddItemToCartRequest'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddItemToCartResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+    get:
+      summary: Get Cart Items
+      description: Retrieve all items currently in user's cart
+      x-visibility: public
+      operationId: retrieveCartItems
+      tags:
+        - 'cart'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItem'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      summary: Clear Cart
+      description: Removes all items from the user's cart
+      x-visibility: public
+      operationId: clearAllCartItems
+      tags:
+        - 'cart'
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+
+
+
+  /cart/items/{itemId}:
+    put:
+      summary: Update Cart Item
+      description: Update the quantity or other details of an item in the cart
+      x-visibility: public
+      operationId: updateCartItem
+      tags:
+        - 'cart'
       parameters:
-        - in: "body"
-          name: "body"
+        - name: itemId
+          in: path
           required: true
           schema:
-            $ref: "#/definitions/UserTokenRequest"
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartRequest'
+
       responses:
-        "200":
-          description: "Success"
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItems'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      summary: Remove Item from cart
+      description: Remove am item from the user's cart
+      x-visibility: public
+      operationId: removeItemFromCart
+      tags:
+        - 'cart'
+      parameters:
+        - name: itemId
+          in: path
+          required: true
           schema:
-            $ref: "#/definitions/UserTokenResponse"
-        "400":
-          description: "Bad request"
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItems'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /cart/total:
+    get:
+      summary: Get Cart Total
+      description: Calculates and returns the total cost of items in the cart
+      x-visibility: public
+      operationId: getTotalCartCost
+      tags:
+        - 'cart'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotalCart'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /cart/checkout:
+    post:
+      summary: Checkout
+      description: Initiates the checkout process for items in the cart
+      x-visibility: public
+      operationId: checkout
+      tags:
+        - 'cart'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequest'
+      responses:
+        '200':
+          $ref: '#/components/schemas/CheckoutResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /booking/items/{itemId}/summary:
+    get:
+      summary: Cart Items Summary
+      description: Get booking summary
+      x-visibility: public
+      operationId: getCartItemsSummary
+      tags:
+        - 'booking'
+      parameters:
+        - name: itemId
+          in: path
+          required: true
           schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "401":
-          description: "Unathorized request"
+            type: string
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/BookingSummary'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /category:
+    post:
+      summary: Add Category
+      description: Post Category
+      x-visibility: public
+      operationId: addCategory
+      tags:
+        - category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategory'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/StatusResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+    get:
+      summary: Fetch Category
+      description: fetch all categories
+      x-visibility: public
+      operationId: fetchCategories
+      tags:
+        - 'category'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryList'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /category/{categoryId}:
+    get:
+      summary: Fetch category by Id
+      description: Fetch category by ID
+      x-visibility: public
+      operationId: fetchCategoryById
+      tags:
+        - 'category'
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
           schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "402":
-          description: "Request failed"
+            type: string
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /booking/confirm:
+    post:
+      summary: confirm Booking
+      description: Confirm booking
+      x-visibility: public
+      operationId: confirmBooking
+      tags:
+        - 'booking'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmBookingRequest'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmBookingResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+  /products:
+    get:
+      summary: Fetch Products
+      description: Fetch products
+      x-visibility: public
+      operationId: fetchProducts
+      tags:
+        - 'product'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductItems'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+          $ref: '#/components/responses/ServerError'
+
+
+components:
+  schemas:
+    # REQUEST OBJECT DEFINITIONS
+    UserSignup:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - phone
+        - password
+      properties:
+        firstName:
+          type: string
+          format: string
+          description: The  fullname of User to be added
+        lastName:
+          type: string
+          format: string
+          description: The fullname of User to be added
+        email:
+          type: string
+          description: User's email
+        phone:
+          type: string
+          description: User's phone
+        password:
+          type: string
+          description: user's password
+
+
+    UserLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: The email of the User attempting login
+        password:
+          type: string
+          description: user's password
+
+
+    VerifyUser:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          description: The email of the User attempting to verify if it exists
+
+    VerifyOTP:
+      type: object
+      required:
+        - email
+        - otp
+      properties:
+        email:
+          type: string
+          description: Email provided to verify
+        otp:
+          type: string
+          description: Five digit  OTP
+
+
+    SuccessMessage:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Return a true to state that action was successful
+          example: true
+        message:
+          type: string
+          description: Message for successful operation
+          example: Verification otp has been sent to your email
+
+    # RESPONSE OBJECT DEFINITIONS
+
+    SignupResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - properties:
+            authToken:
+              type: string
+              description: user's authentication token
+
+    LoginResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          description: user's email
+        firstname:
+          type: string
+          description: user's firstname
+        lastname:
+          type: string
+          description: user's lastname
+        status:
+          type: string
+          description: user's status
+        accessToken:
+          type: string
+          format: jwt
+          description: authorizes a valid user
+
+    CheckoutResponse:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/BookingStatus'
+        bookingId:
+          type: string
+          description: Booking id
+        totalAmount:
+          type: number
+          example: "100.00"
+
+
+
+
+    VerifyOTPResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          format: jwt
+          description: full auth token for valid user
+
+    VerifyUserResponse:
+      type: object
+      properties:
+        message:
+          $ref: '#/components/schemas/VerifyUserMessage'
+
+
+    AddItemToCartResponse:
+      type: object
+      properties:
+        cartItemId:
+          $ref: '#/components/schemas/UUID'
+
+    AddItemToCartRequest:
+      type: object
+      required:
+        - productId
+        - quantity
+      properties:
+        productId:
+          $ref: '#/components/schemas/UUID'
+        quantity:
+          type: integer
+
+    UpdateCartRequest:
+      type: object
+      properties:
+        sellingPrice:
+          type: number
+          format: float
+        ownerShipType:
+          type: string
+
+
+    CheckoutRequest:
+      type: object
+      required:
+        - coverImg
+        - eventType
+        - eventEndDate
+        - shippingFee
+        - totalAmount
+      properties:
+        coverImg:
+          type: string
+        eventType:
+          type: string
+        eventEndDate:
+          type: string
+          example: 1661162328651
+        shippingFee:
+          type: number
+        totalAmount:
+          type: number
+
+    ConfirmBookingRequest:
+      type: object
+      required:
+        - coverImage
+        - purchaseEndDate
+        - eventType
+      properties:
+        coverImage:
+          type: string
+        purchaseEndDate:
+          type: string
+          example: "2024-01-30"
+        eventType:
+          type: string
+
+
+    ConfirmBookingResponse:
+      type: object
+      properties:
+        bookingId:
+          $ref: '#/components/schemas/UUID'
+        bookingNumber:
+          type: integer
+        bookingUrl:
+          type: string
+
+
+
+
+
+
+    CreateCategory:
+      type: object
+      required:
+        - parentId
+        - position
+        - name
+        - slug
+      properties:
+        parentId:
+          type: integer
+        position:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+
+
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        product:
+          $ref: '#/components/schemas/Product'
+        costPrice:
+          type: number
+          format: float
+        sellingPrice:
+          type: number
+          format: float
+        ownershipType:
+          type: string
+
+    Product:
+      type: object
+      properties:
+        productId:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        price:
+          type: number
+          format: float
+        sku:
+          type: integer
+        category:
+          $ref: '#/components/schemas/Category'
+        description:
+          type: string
+        brand:
+          type: string
+        productImages:
+          $ref: '#/components/schemas/ProductImageList'
+        status:
+          $ref: '#/components/schemas/ProductStatus'
+
+    ProductItems:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
+
+
+    ProductImageList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ProductImages'
+
+    ProductImages:
+      type: object
+      properties:
+        productId:
+          $ref: '#/components/schemas/UUID'
+        image:
+          type: string
+        position:
+          type: number
+
+
+
+    CartItems:
+      type: array
+      items:
+        $ref: '#/components/schemas/CartItem'
+
+    Products:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
+
+    BookingSummary:
+      type: object
+      properties:
+        total:
+          type: number
+          format: float
+        product:
+          $ref: '#/components/schemas/Products'
+        shippingFee:
+          type: number
+          format: float
+
+    CartItemsSummary:
+      type: object
+      properties:
+        subTotal:
+          type: number
+          format: float
+        shippingFee:
+          type: number
+          format: float
+        couponAmount:
+          type: number
+          format: float
+        carts:
+          $ref: '#/components/schemas/CartItems'
+
+
+    CategoryList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Category'
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        position:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        status:
+          type: string
+        children:
+          $ref: '#/components/schemas/CategoryChildren'
+
+
+
+    CategoryChildren:
+      type: array
+      items:
+        $ref: '#/components/schemas/Category'
+
+
+    TotalCart:
+      type: object
+      properties:
+        total:
+          type: number
+          format: float
+
+    User:
+      type: 'object'
+      required:
+        - 'id'
+        - 'firstName'
+        - 'lastName'
+        - 'email'
+        - 'status'
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        firstName:
+          type: 'string'
+          description: 'The firstname of user'
+        lastName:
+          type: 'string'
+          description: 'The lastname of user'
+        email:
+          type: 'string'
+          format: 'email'
+          description: 'The email of  user'
+
+
+
+    ErrorMessageDto:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Descriptive error message
+
+    StatusDto:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          description: additional message describing status
+
+    UUID:
+      type: string
+      format: uuid
+      example: 3a5aaea8-504a-4404-ad3d-b82574fba5e5
+      description: General format for UUID
+
+    VerifyUserMessage:
+      type: string
+      enum:
+        - "USER_AVAILABLE"
+        - "USER_NOT_AVAILABLE"
+
+    BookingStatus:
+      type: string
+      enum:
+        - "BOOKING_SUCCESSFUL"
+        - "BOOKING_CANCELED"
+        - "BOOKING_CLOSED"
+
+    ProductStatus:
+      type: string
+      enum:
+        - "VERIFIED"
+        - "UNVERIFIED"
+        - "OUT_OF_STOCK"
+        - "DISABLED"
+        - "UNKNOWN"
+
+    # ENUM DEFINITIONS
+  responses:
+    StatusResponse:
+      description: Request status
+      content:
+        application/json:
           schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "404":
-          description: "Resource not found"
+            $ref: '#/components/schemas/StatusDto'
+          example:
+            success: true
+            message: 'Action completed successfully'
+            data:
+              label: name  of service
+              expiry: date
+
+    InvalidRequest:
+      description: Request could not be validated
+      content:
+        application/json:
           schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
-        "500":
-          description: "Server error"
+            $ref: '#/components/schemas/ErrorMessageDto'
+          example:
+            code: 'BAD_REQUEST'
+            message: 'Request could not be validated.'
+
+    Unauthorized:
+      description: Client is not authorized to make request
+      content:
+        application/json:
           schema:
-            $ref: "./common.yaml#/components/schemas/ErrorMessageDto"
+            $ref: '#/components/schemas/ErrorMessageDto'
+          example:
+            code: 'UNAUTHORIZED'
+            message: 'Either client security header is missing or it is not valid.'
 
-definitions:
+    NotFound:
+      description: Entity was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessageDto'
+          example:
+            code: 'NOT_FOUND'
+            message: 'Information could not be found'
 
-  UserTokenSessionDto:
-    type: "object"
-    required:
-      - userId
-    properties:
-      sessionId:
-        type: "string"
-        format: "uuid"
-        description: "Session identifier (uuid)"
-      userId:
-        type: "string"
-        format: "uuid"
-        description: "User identifier (uuid)"
+    ConflictError:
+      description: Entity already exist while user tries to create it.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessageDto'
+          example:
+            code: 'ACCESS_DENIED'
+            message: 'Entity already exist!'
 
-  UserTokenRequest:
-    type: "object"
-    required:
-      - userId
-      - scopes
-      - ttl
-    properties:
-      userId:
-        type: "string"
-        format: "uuid"
-        description: "User's unique identifier."
-      scopes:
-        type: "array"
-        description: "Scopes you'd like this token to have."
-        minItems: 0
-        items:
-          type: "string"
-          pattern: "^users\\."
-          example: "users.global.full-login"
-      ttl:
-        type: "integer"
-        format: int64
-        example: 3600
-        description: "Time to live in seconds"
-      payload:
-        type: "object"
-        example:
-          some_property: "value"
-          another_property: "value2"
-      isOneTime:
-        type: boolean
-        description: |
-          Indicates if the token is for one-time use. A one-time use token can only be once.
-          Subsequent validations will return false.
-        default: false
-      deviceIdentifier:
-        type: string
-        description: An arbritrary string to identify device where session was created. It is embedded in the payload
-        default: unknown_device
+    AccessDenied:
+      description: Expected permission is not available.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessageDto'
+          example:
+            code: 'ACCESS_DENIED'
+            message: 'Expected permission or scope is not present.'
 
+    ServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessageDto'
+          example:
+            code: 'INTERNAL_ERROR'
+            message: 'An internal server error occurred.'
 
-  ServiceTokenRequest:
-    type: "object"
-    properties:
-      payload:
-        type: "object"
-        example:
-          some_property: "value"
-          another_property: "value2"
-
-  CreateServiceRequest:
-    type: "object"
-    required:
-      - scopes
-      - audience
-      - description
-      - sourceServiceId
-    properties:
-      description:
-        type: "string"
-        description: "Service description"
-        example: "Short description of service"
-      audience:
-        type: string
-        description: |
-          The audience that tokens generated by this service are meant for, should be the organization by default.
-        example: guildos
-      sourceServiceId:
-        type: string
-        description: |
-          The ID of the service, not to be confused with authServiceId which is returned after
-          a service credential is created.
-        example: users
-      scopes:
-        type: "array"
-        description: "Scopes to be included in service token"
-        minItems: 0
-        items:
-          pattern: "^svcs\\."
-          type: "string"
-          example: "svcs.*"
-
-  ScopeUpdateRequest:
-    type: "object"
-    required:
-      - serviceId
-      - scopes
-    properties:
-      serviceId:
-        type: "string"
-        format: "uuid"
-      scopes:
-        type: "array"
-        minItems: 0
-        items:
-          pattern: "^svcs\\."
-          type: "string"
-          example: "svcs.*"
-
-  UserTokenResponse:
-    type: "object"
-    required:
-      - userId
-      - token
-      - sessionId
-    properties:
-      userId:
-        type: "string"
-        description: "User ID"
-        format: "uuid"
-      sessionId:
-        type: string
-        format: uuid
-        description: session attached to this token, can be used to invalidate token
-      token:
-        type: "string"
-        description: "User JWT token"
-      scopes:
-        type: "array"
-        description: "Scopes included in the token"
-        items:
-          type: "string"
-          example: "auth.*"
-      createdAt:
-        $ref: "./common.yaml#/components/schemas/Timestamp"
-      expiresAt:
-        $ref: "./common.yaml#/components/schemas/Timestamp"
-
-  ServiceToken:
-    type: "object"
-    required:
-      - serviceId
-      - token
-      - scopes
-    properties:
-      serviceId:
-        type: "string"
-        format: "uuid"
-        description: "Service Identifier"
-      token:
-        type: "string"
-        description: "Service token"
-      scopes:
-        type: "array"
-        description: "Scopes inlcuded in token"
-        items:
-          type: "string"
-      createdAt:
-        $ref: './common.yaml#/components/schemas/Timestamp'
-      expiresAt:
-        $ref: './common.yaml#/components/schemas/Timestamp'
-
-  ServiceCreated:
-    type: "object"
-    properties:
-      serviceId:
-        type: "string"
-        format: "uuid"
-      audience:
-        type: "string"
-        description: "A URI string pointing to the service owner"
-      scopes:
-        type: "array"
-        description: "Service scopes"
-        items:
-          type: "string"
-      secret:
-        type: "string"
-        description: "Service secret key. This key can be used along with your serviceId to generate a service token."
-        example: "SERVICE_SECRET"
-      createdAt:
-        $ref: "./common.yaml#/components/schemas/Timestamp"
-      updatedAt:
-        $ref: "./common.yaml#/components/schemas/Timestamp"
-
-  ScopesUpdateDto:
-    type: "object"
-    properties:
-      status:
-        type: "string"
-        example: "success"
-      serviceId:
-        type: "string"
-        format: "uuid"
-      scopes:
-        type: "array"
-        items:
-          type: "string"
-      updatedAt:
-        $ref: "./common.yaml#/components/schemas/Timestamp"
+  securitySchemes:
+    bearerToken:
+      type: 'http'
+      scheme: 'bearer'
+      bearerFormat: 'JWT'
+      description: 'Authentication for user-facing endpoints. Uses bearer token in API prefix.'
+    authToken:
+      type: 'apiKey'
+      name: 'x-auth-token'
+      in: 'header'
+      description: 'Auth Token header  for inter-service communication'

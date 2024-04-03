@@ -1,7 +1,7 @@
 import fs, {PathOrFileDescriptor} from 'fs'
 import {parse} from "yaml"
 import {convertObj} from 'swagger2openapi';
-const oasValidator = require('oas-validator');
+import validator from 'ibm-openapi-validator';
 
 
 type Oas2 = {
@@ -32,17 +32,21 @@ export const convertToOas3 = async (specs: any): Promise<Oas3> => {
     }
 }
 
-const validateOas = async (specs) => {
-
+const validateOas = async (specs: Oas2 | Oas3): Promise<any> => {
+    return await validator(specs);
 }
 
 //return oas3 validated specs
-function validatedSpecs(specs: any) {
+const validatedSpecs = async (specs: any) => {
     try{
         if(isOas2(specs)) {
-          return 
+          return await convertToOas3(specs);
+        }else if(isOas3(specs)) {
+            let result = await validateOas(specs);
+            console.log("result", result)
         }
-
+    }catch(err) {
+      
     }
 }
 

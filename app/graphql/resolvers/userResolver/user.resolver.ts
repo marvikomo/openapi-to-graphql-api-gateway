@@ -7,15 +7,23 @@ const userService: UserService = di.get("user");
 
 const userResolvers = {
   Query: {
-    me(_: any, { firstName, lastName }: IUserDetails, {}) {
+    me(_: any, {}: IUserDetails, {}) {
       const currentUser = {
-        firstName,
-        lastName,
+        firstName: "test",
+        lastName: "test",
       };
       return userService.me(currentUser);
     },
   },
-  // Mutation: {},
+  Mutation: {
+    createMe(_: any, { firstName, lastName }: IUserDetails, {}) {
+      const currentUser = {
+        firstName, lastName
+      };
+      console.log(currentUser)
+      return userService.createMe(currentUser);
+    },
+  },
 };
 
 export default userResolvers;

@@ -12,7 +12,11 @@ const user_schema = `#graphql
   scalar JSON
 
   type Query {
-    me(firstName: String, lastName: String): UserResponse
+    me: UserResponse
+  }
+
+  type Mutation {
+    createMe(firstName: String, lastName: String): UserResponse
   }
 
   type UserObject {

@@ -1,7 +1,7 @@
 import di from './service-locator';
 
 //Services
-import { UserService } from '../services/UserService/user.service';
+import { UserService } from '../services/user.service';
 import { LoggerService } from '../services/logger.service';
 
 // logger

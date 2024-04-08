@@ -1,13 +1,12 @@
 /** @format */
 
-import di from "../../../config/di";
-import { UserService } from "../../../services/UserService/user.service";
-import { IUserDetails } from "../../../common/Dto/IUser";
+import di from "../../config/di";
+import { UserService } from "../../services/user.service";
 const userService: UserService = di.get("user");
 
 const userResolvers = {
   Query: {
-    me(_: any, {}: IUserDetails, {}) {
+    me(_: any, {}, {}) {
       const currentUser = {
         firstName: "test",
         lastName: "test",
@@ -16,7 +15,7 @@ const userResolvers = {
     },
   },
   Mutation: {
-    createMe(_: any, { firstName, lastName }: IUserDetails, {}) {
+    createMe(_: any, { firstName, lastName }, {}) {
       const currentUser = {
         firstName, lastName
       };

@@ -1,5 +1,8 @@
 /** @format */
 
+import di from "../../config/di";
+import { UserService } from "../../services/UserService/user.service";
+const userService: UserService = di.get("user");
 
 const userResolvers = {
   Query: {
@@ -8,11 +11,7 @@ const userResolvers = {
         firstName: "test",
         lastName: "test",
       };
-      return {
-        status: "sucess",
-        data: currentUser,
-        message: "sucessful"
-      }
+      return userService.me(currentUser);
     },
   },
   Mutation: {
@@ -20,11 +19,8 @@ const userResolvers = {
       const currentUser = {
         firstName, lastName
       };
-      return {
-        status: "sucess",
-        data: currentUser,
-        message: "sucessful"
-      }
+      console.log(currentUser)
+      return userService.createMe(currentUser);
     },
   },
 };

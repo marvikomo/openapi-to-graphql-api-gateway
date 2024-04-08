@@ -1,5 +1,10 @@
 import { Console } from "console"
+import fs from 'fs'
 import  {loadYaml, convertToOas3} from "./oas"
+import { METHODS } from "http"
+import path from 'path'
+import * as Handlebars from 'handlebars';
+
 
 
 const parsed = loadYaml("src/specs/test.yaml")
@@ -61,7 +66,9 @@ const groupPathsByTags = (paths) => {
    
 });
 
- console.log("groupByTags", groupedByTags)
+return groupedByTags
+
+ //console.log("groupByTags", groupedByTags)
 
 }
 
@@ -69,14 +76,58 @@ const convertPathsToGraphQLFields = (paths) => {
 
 }
 
+const generateSchemaAndResolverFiles = (groupedTags) => {
+    const templatePath = path.join(__dirname, 'templates/schemaTemplate.handlebars');
+    const templateSource = fs.readFileSync(templatePath, 'utf8');
+    const template = Handlebars.compile(templateSource);
+
+    let queries = []
+    let mutations = []
+    let guped =  Object.entries(groupedTags)
+
+    console.log("grouped", guped)
+
+
+    let entries = Object.entries(groupedTags).forEach(([tag, paths]) => {
+       // console.log("path", methods)
+         Object.entries(paths).forEach(([path, methods]) => {
+           
+            if(methods.get) {
+                queries.push({name: methods.get.operationId, tag})
+            }
+
+            if(methods.post) {
+                mutations.push({name: methods.post.operationId, tag})
+            }
+        })
+
+         const schemaContent = template({ tag, queries, mutations });
+       //  console.log("queries", queries)
+
+         const filename = `${tag}_schema.ts`;
+         fs.writeFileSync(filename, schemaContent);
+         console.log(`Generated schema file: ${filename}`);
+         queries = []
+         mutations = []
+       
+    })
+
+   // const schemaContent =  
+
+   //console.log("entries", entries) 
+
+
+}
+
 
 const convert = async () => {
     let parsedRes = await convertToOas3(parsed)
 
-     //console.log(parsedRes.paths)
+    // console.log(parsedRes.paths)
     let tags = getTags(parsedRes)
     let paths = getPaths(parsedRes);
     let  grouped = groupPathsByTags(paths);
+    generateSchemaAndResolverFiles(grouped);
 
     //  console.log("ForEach starts....")
     //  tags.forEach(e => {

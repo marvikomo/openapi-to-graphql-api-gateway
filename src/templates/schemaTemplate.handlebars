@@ -1,0 +1,40 @@
+/** @format */
+
+const {{tagName}}_schema = `#graphql
+
+  directive @auth on FIELD_DEFINITION
+  directive @userType(requires: [UserType]) on FIELD_DEFINITION
+
+  scalar Upload
+  scalar JSON
+
+  type Query {
+    {{#each queries}}
+    {{this.name}}(firstName: String, lastName: String): UserResponse
+    {{/each}}
+  }
+
+  type Mutation {
+    {{#each mutations}}
+    {{this.name}}(firstName: String, lastName: String): UserResponse
+    {{/each}}
+  }
+
+  type UserObject {
+    firstName: String
+    lastName: String
+  }
+
+  type UserResponse {
+    status: String
+    data: UserObject
+    message: String
+  }
+
+  type Response {
+    status: String
+    message: String
+  }
+`;
+
+export default {{tagName}}_schema;

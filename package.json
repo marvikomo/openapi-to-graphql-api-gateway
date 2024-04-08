@@ -36,6 +36,7 @@
     "body-parser": "^1.20.2",
     "dotenv": "^16.4.1",
     "express": "^4.17.2",
+    "fs-extra": "^11.2.0",
     "node-fetch": "^3.3.2",
     "oas-validator": "^5.0.2",
     "openapi-to-graphql": "^3.0.7",

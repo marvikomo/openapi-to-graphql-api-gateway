@@ -1,4 +1,3 @@
-import { IError, ISuccess } from '../common/IResponse';
 import ResponseMessages from './response-messages';
 
 /**
@@ -26,7 +25,7 @@ export default class Helpers {
   static success = (
     data: object | Array<object> | null,
     message?: string
-  ): ISuccess => {
+  ) => {
     return {
       message,
       data,
@@ -39,7 +38,7 @@ export default class Helpers {
    * @param  {string} message - Error message.
    * @return {object} - The result.
    */
-  static error = (message?: string): IError => {
+  static error = (message?: string) => {
     return {
       message,
       status: ResponseMessages.STATUS_ERROR,

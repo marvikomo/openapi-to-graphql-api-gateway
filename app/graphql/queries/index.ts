@@ -1,4 +1,4 @@
-import userSchema from './userTypeDef/user_schema';
+import userSchema from './user_schema';
 
 const schema = [
   userSchema,

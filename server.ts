@@ -8,8 +8,6 @@ import express from 'express';
 import http from 'http';
 import config from './app/config/config';
 import di from './app/config/di';
-import { authDirective } from './app/graphql/directives/authDirective';
-import { userTypeDirective } from './app/graphql/directives/userTypeDirective';
 import typeDefs from './app/graphql/queries';
 import resolvers from './app/graphql/resolvers';
 import { LoggerService } from './app/services/logger.service';
@@ -20,10 +18,6 @@ let schema = makeExecutableSchema({
   typeDefs,
   resolvers,
 });
-
-// Transform the schema by applying directive logic
-schema = userTypeDirective(schema, 'userType');
-schema = authDirective(schema, 'auth');
 
 // interface Context {
 //   token?: string;

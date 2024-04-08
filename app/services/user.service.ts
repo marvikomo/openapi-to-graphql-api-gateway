@@ -1,7 +1,7 @@
 /** @format */
 
 import { GraphQLError } from "graphql";
-import Helpers from "../../lib/helpers";
+import Helpers from "../lib/helpers";
 
 export class UserService {
   constructor() {}

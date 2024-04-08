@@ -1,7 +1,7 @@
 /** @format */
 
 import di from "../../config/di";
-import { UserService } from "../../services/UserService/user.service";
+import { UserService } from "../../services/user.service";
 const userService: UserService = di.get("user");
 
 const userResolvers = {

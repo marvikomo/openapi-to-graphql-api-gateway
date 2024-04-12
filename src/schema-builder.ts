@@ -4,6 +4,7 @@ import  {loadYaml, convertToOas3} from "./oas"
 import { METHODS } from "http"
 import path from 'path'
 import * as Handlebars from 'handlebars';
+import Generator from "./generator"
 
 
 
@@ -76,19 +77,33 @@ const convertPathsToGraphQLFields = (paths) => {
 
 }
 
-const generateSchemaAndResolverFiles = (groupedTags) => {
+const getQueryOutputFolder = () => {
+    return path.join(__dirname, '../app/graphql/queries')
+}
+
+const createQueryFolder = (outputFolder) => {
+    if(!fs.existsSync(outputFolder)){
+        fs.mkdirSync(outputFolder, {recursive: true})
+    }
+}
+
+const generateSchemaAndResolverFiles = (groupedByTags) => {
     const templatePath = path.join(__dirname, 'templates/schemaTemplate.handlebars');
     const templateSource = fs.readFileSync(templatePath, 'utf8');
     const template = Handlebars.compile(templateSource);
 
     let queries = []
     let mutations = []
-    let guped =  Object.entries(groupedTags)
+    let guped =  Object.entries(groupedByTags)
 
     console.log("grouped", guped)
 
+     const queryOutPutFolder = getQueryOutputFolder();
+    // console.log("output...", queryOutPutFolder)
+    createQueryFolder(queryOutPutFolder);
 
-    let entries = Object.entries(groupedTags).forEach(([tag, paths]) => {
+
+    let entries = Object.entries(groupedByTags).forEach(([tag, paths]) => {
        // console.log("path", methods)
          Object.entries(paths).forEach(([path, methods]) => {
            
@@ -102,11 +117,17 @@ const generateSchemaAndResolverFiles = (groupedTags) => {
         })
 
          const schemaContent = template({ tag, queries, mutations });
-       //  console.log("queries", queries)
+         //console.log("queries", queries)
 
-         const filename = `${tag}_schema.ts`;
-         fs.writeFileSync(filename, schemaContent);
-         console.log(`Generated schema file: ${filename}`);
+        // const filename = `${tag}_schema.ts`;
+
+         const filename = path.join(queryOutPutFolder, `${tag}_schema.ts`);
+         if (!fs.existsSync(filename) || fs.readFileSync(filename, 'utf8') !== schemaContent) {
+            fs.writeFileSync(filename, schemaContent);
+            console.log(`Generated or updated schema file: ${filename}`);
+        } else {
+            console.log(`No changes detected for ${filename}, skipping update.`);
+        }
          queries = []
          mutations = []
        
@@ -119,15 +140,26 @@ const generateSchemaAndResolverFiles = (groupedTags) => {
 
 }
 
+const generateSchemas = (groupedByTags) => {
+
+
+}
+
 
 const convert = async () => {
+
+    const generate = new Generator(path.join(__dirname, 'specs'))
+    await generate.readFilesInDirectory();
+    await generate.generateSchemaAndResolver();
+    //console.log("ik", generate.specDirContent)
     let parsedRes = await convertToOas3(parsed)
 
     // console.log(parsedRes.paths)
-    let tags = getTags(parsedRes)
-    let paths = getPaths(parsedRes);
-    let  grouped = groupPathsByTags(paths);
-    generateSchemaAndResolverFiles(grouped);
+    //let tags = getTags(parsedRes)
+    // let paths = getPaths(parsedRes);
+    // let  grouped = groupPathsByTags(paths);
+
+    //generateSchemaAndResolverFiles(grouped);
 
     //  console.log("ForEach starts....")
     //  tags.forEach(e => {
@@ -135,8 +167,8 @@ const convert = async () => {
     //     console.log(e)
         
     //  });
-    //console.log(parsedRes.paths['/onboarding/'].post.requestBody.content['application/json'].schema['$ref']);
-    //console.log(parsedRes.paths['/onboarding/'].post.responses['200'].content['application/json'].schema['$ref']);
+    // console.log(parsedRes.paths['/onboarding/'].post.requestBody.content['application/json'].schema['$ref']);
+    // console.log(parsedRes.paths['/onboarding/'].post.responses['200'].content['application/json'].schema['$ref']);
 }
 
 convert()

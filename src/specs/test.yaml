@@ -8,7 +8,7 @@ info:
     email: 'marv@myasoebi.com'
 
 x-organization: myasoebi
-x-service-id: backend
+x-service-id: user
 
 servers:
   - description: Staging Ingress

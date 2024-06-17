@@ -1,5 +1,9 @@
 import  {loadYaml, convertToOas3} from "./oas"
+import * as SwaggerParser from 'swagger-parser';
+import OpenAPIParser  from '@readme/openapi-parser';
 
+
+import OASNormalize from 'oas-normalize';
 
 const parsed = loadYaml("src/specs/test.yaml")
 
@@ -32,7 +36,21 @@ const parsed = loadYaml("src/specs/test.yaml")
 //Use it to generate the schema
 
 const convert = async () => {
-    let parsedRes = await convertToOas3(parsed)
+    const oas1 = new OASNormalize(
+        "src/specs/test.yaml",
+        { enablePaths: true }
+        // ...or a string, path, JSON blob, whatever you've got.
+      );
+      const oas2 = new OASNormalize(
+        "src/specs/test2.yaml",
+        { enablePaths: true }
+        // ...or a string, path, JSON blob, whatever you've got.
+      );
+    const api = await oas1.deref();
+    const ap2 = await oas2.deref();
+    console.log("API", api)
+    console.log("API2", ap2)
+  //  let parsedRes = await convertToOas3(parsed)
     //console.log(parsedRes.paths['/onboarding/'].post.requestBody.content['application/json'].schema['$ref']);
     //console.log(parsedRes.paths['/onboarding/'].post.responses['200'].content['application/json'].schema['$ref']);
 }

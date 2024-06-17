@@ -1,7 +1,9 @@
 const fs = require('fs').promises
 import path from 'path'
+import OASNormalize from 'oas-normalize'
 import { loadYaml, convertToOas3 } from './oas'
 import * as Handlebars from 'handlebars'
+
 import {
   createFolder,
   toPascalCase,
@@ -9,18 +11,18 @@ import {
   writeFile,
   checkIfFileExists,
   toCamelCase,
-  removeServiceSuffix
+  removeServiceSuffix,
 } from './helper'
 
 const Modules = {}
 enum GenerationType {
-    Query,
-    Resolver
+  Query,
+  Resolver,
 }
 
 const Templates = {
-   Query: 'templates/queryTemplate.handlebars',
-   Resolver: 'templates/resolverTemplate.handlebars'
+  Query: 'templates/queryTemplate.handlebars',
+  Resolver: 'templates/resolverTemplate.handlebars',
 }
 
 class Generator {
@@ -33,16 +35,26 @@ class Generator {
   }
 
   async readFilesInDirectory(): Promise<any> {
-    const files = await fs.readdir(this.specDir)
-    for (const file of files) {
-      const filepath = path.join(this.specDir, file)
-      this.specDirFiles.push(filepath)
+    try {
+      const files = await fs.readdir(this.specDir)
+      for (const file of files) {
+        if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+          const filepath = path.join(this.specDir, file)
+          this.specDirFiles.push(filepath)
+        }
+      }
+
+      console.log("xxx", this.specDirFiles)
+    } catch (error) {
+      console.error('Error reading directory:', error)
     }
   }
 
   async parseSpec(path): Promise<any> {
     const parsedSpec = loadYaml(path)
-    return await convertToOas3(parsedSpec)
+    const convertedSpec = await convertToOas3(parsedSpec)
+    const oas = new OASNormalize(path, { enablePaths: true })
+    return oas.deref()
   }
 
   getOutputFolder = (_path) => {
@@ -90,15 +102,21 @@ class Generator {
   }
 
   getQueryOutPathForServiceId(serviceId) {
-   return this.getOutputFolder(`${this.getQueryPath()}${toPascalCase(serviceId)}`)
+    return this.getOutputFolder(
+      `${this.getQueryPath()}${toPascalCase(serviceId)}`,
+    )
   }
 
   getResolverOutPathForServiceId(serviceId) {
-    return this.getOutputFolder(`${this.getResolverPath()}${toPascalCase(serviceId)}`)
+    return this.getOutputFolder(
+      `${this.getResolverPath()}${toPascalCase(serviceId)}`,
+    )
   }
 
   getServiceOutPathForServiceId(serviceId) {
-    return this.getOutputFolder(`${this.getServicePath()}${toPascalCase(serviceId)}`)
+    return this.getOutputFolder(
+      `${this.getServicePath()}${toPascalCase(serviceId)}`,
+    )
   }
 
   getServiceExportName(serviceId) {
@@ -113,23 +131,15 @@ class Generator {
     return removeServiceSuffix(serviceId)
   }
 
-
-
   generateGraphqlFoldersForService(serviceId) {
     //Creates for query
-    createFolder(
-      this.getQueryOutPathForServiceId(serviceId)
-    )
+    createFolder(this.getQueryOutPathForServiceId(serviceId))
 
     //Create for resolver
-    createFolder(
-      this.getResolverOutPathForServiceId(serviceId)
-    )
+    createFolder(this.getResolverOutPathForServiceId(serviceId))
 
     //Create for Service
-    createFolder(
-      this.getServiceOutPathForServiceId(serviceId)
-    )
+    createFolder(this.getServiceOutPathForServiceId(serviceId))
   }
 
   getQueryTemplate() {
@@ -140,20 +150,29 @@ class Generator {
     return path.join(__dirname, Templates.Resolver)
   }
 
-  async generateSchema(serviceId, groupedByTags, template, generationType, outputPath, extension) {
+  async generateSchema(
+    serviceId,
+    groupedByTags,
+    template,
+    generationType,
+    outputPath,
+    extension,
+  ) {
     let queries = []
     let mutations = []
 
-    if(!template) {
-        throw new Error("No valid template")
-      }
+    if (!template) {
+      throw new Error('No valid template')
+    }
 
-
-
-     Object.entries(groupedByTags).forEach(([tag, paths]) => {
+    Object.entries(groupedByTags).forEach(([tag, paths]) => {
       // console.log("path", methods)
       Object.entries(paths).forEach(([path, methods]) => {
         if (methods.get) {
+          console.log(
+            'method2',
+            methods.get.responses['200'].content['application/json'],
+          )
           queries.push({ name: methods.get.operationId, tag })
         }
 
@@ -164,20 +183,22 @@ class Generator {
 
       let schemaContent
 
-      if(GenerationType.Query == generationType) {
-         schemaContent = template({ tag, queries, mutations })
+      if (GenerationType.Query == generationType) {
+        schemaContent = template({ tag, queries, mutations })
       }
-      
 
-      if(GenerationType.Resolver == generationType) {
-     
-        schemaContent = template({ ServiceName: this.getServiceExportName(serviceId), serviceName: this.getServiceName(serviceId), serviceIdentifier: this.getServiceIdentifier(serviceId), tag, queries, mutations })
-     }
+      if (GenerationType.Resolver == generationType) {
+        schemaContent = template({
+          ServiceName: this.getServiceExportName(serviceId),
+          serviceName: this.getServiceName(serviceId),
+          serviceIdentifier: this.getServiceIdentifier(serviceId),
+          tag,
+          queries,
+          mutations,
+        })
+      }
 
-      const filename = path.join(
-        outputPath,
-        `${tag}_${extension}`,
-      )
+      const filename = path.join(outputPath, `${tag}_${extension}`)
       console.log('fileName', filename)
       if (
         !checkIfFileExists(filename) ||
@@ -193,15 +214,17 @@ class Generator {
     })
   }
 
-
-
   async generateSchemaAndResolver(): Promise<void> {
     for (const file of this.specDirFiles) {
       const parsedSpec = await this.parseSpec(file)
 
-      const serviceId = parsedSpec['x-service-id']
+      console.log('parsed spec', parsedSpec)
 
-      this.generateGraphqlFoldersForService(serviceId)
+       const serviceId = parsedSpec['x-service-id']
+        if (!serviceId)
+         throw new Error('Missing serviceId in this format x-service-id')
+
+       this.generateGraphqlFoldersForService(serviceId)
 
       const templateSource = readFile(this.getQueryTemplate())
       const template = Handlebars.compile(templateSource)
@@ -224,6 +247,5 @@ class Generator {
 }
 
 export default Generator
-
 
 //For Service let it be Pascal Case

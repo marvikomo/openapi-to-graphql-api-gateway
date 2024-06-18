@@ -22,6 +22,13 @@ const userResolvers = {
       console.log(currentUser)
       return userService.createMe(currentUser);
     },
+
+    createOrder(_: any, { orderInput: args }, {}) {
+      const body = {
+        ...args,
+      };
+      return userService.createOrder(body);
+    },
   },
 };
 

@@ -5,6 +5,12 @@ const user_schema = `#graphql
     CUSTOMER
   }
 
+  enum GenderEnum {
+    male
+    female
+    others
+  }
+
   directive @auth on FIELD_DEFINITION
   directive @userType(requires: [UserType]) on FIELD_DEFINITION
 
@@ -16,7 +22,29 @@ const user_schema = `#graphql
   }
 
   type Mutation {
-    createMe(firstName: String, lastName: String): UserResponse
+    createMe(firstName: String, lastName: String, gender: GenderEnum, age: Int, totalMoney: Float): UserResponse
+    createOrder(orderInput: OrderInput): OrderResponse
+  }
+
+  input OrderInput {
+    name: String
+    orderID: Int
+    singleProduct: ProductInput
+    manyProducts: [ProductInput]
+  }
+
+  input ProductInput {
+    name: String
+    price: Int
+    imageUrl: String
+    productAvailable: Boolean
+  }
+
+  type Product {
+    name: String
+    price: Int
+    productAvailable: Boolean
+    imageUrl: String
   }
 
   type UserObject {
@@ -27,6 +55,19 @@ const user_schema = `#graphql
   type UserResponse {
     status: String
     data: UserObject
+    message: String
+  }
+
+  type OrderData {
+    name: String
+    orderID: Int
+    singleProduct: Product
+    manyProducts: [Product]
+  }
+
+  type OrderResponse {
+    status: String
+    data: OrderData
     message: String
   }
 

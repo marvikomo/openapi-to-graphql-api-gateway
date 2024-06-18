@@ -212,7 +212,7 @@ class Generator {
         )
         console.log(
           'method2',
-          methods.post?.requestBody?.content,
+          this.extractRequestBodyParams(methods.post?.requestBody),
         )
         if (methods.get) {
           queries.push({ name: methods.get.operationId, tag })
@@ -256,19 +256,19 @@ class Generator {
     })
   }
 
-   extractRequestBodyParams(requestBody: { content: { [mimeType: string]: { schema: Schema } } }) {
-    const params = [];
-    const content = requestBody.content || {};
+   extractRequestBodyParams(requestBody: { content: { [mimeType: string]: { schema: Schema } } }): string[] {
+    const params: string[] = [];
+    const content = requestBody?.content || {};
   
     for (const [mimeType, mediaTypeObject] of Object.entries(content)) {
-      const schema = mediaTypeObject?.schema || {};
+      const schema = mediaTypeObject.schema || {};
       this.extractParamsFromSchema(schema, params);
     }
   
     return params;
   }
 
-   extractParamsFromSchema(schema: Schema, params: string[], parentKey: string = '') {
+   extractParamsFromSchema(schema: Schema, params: string[], parentKey: string = ''): void {
     const properties = schema.properties || {};
     
     for (const [param, details] of Object.entries(properties)) {

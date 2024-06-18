@@ -14,6 +14,45 @@ import {
   removeServiceSuffix,
 } from './helper'
 
+interface OpenAPI {
+  openapi: string;
+  info: {
+    title: string;
+    version: string;
+  };
+  paths: {
+    [key: string]: {
+      [method: string]: PathMethod;
+    };
+  };
+}
+
+
+interface PathMethod {
+  operationId: string;
+  requestBody?: {
+    content: {
+      [mimeType: string]: {
+        schema: Schema;
+      };
+    };
+  };
+}
+
+interface Schema {
+  type?: string;
+  properties?: {
+    [key: string]: Schema;
+  };
+  items?: Schema;
+}
+
+interface Operation {
+  operationId: string;
+  params: string[];
+}
+
+
 const Modules = {}
 enum GenerationType {
   Query,
@@ -67,7 +106,6 @@ class Generator {
 
   groupSpecPathsByTags = (paths) => {
     const groupedByTags = []
-
     Object.entries(paths).forEach(([path, methods]) => {
       Object.entries(methods).forEach(([method, details]) => {
         if (details.tags) {
@@ -168,11 +206,15 @@ class Generator {
     Object.entries(groupedByTags).forEach(([tag, paths]) => {
       // console.log("path", methods)
       Object.entries(paths).forEach(([path, methods]) => {
+        console.log(
+          'method2',
+          methods,
+        )
+        console.log(
+          'method2',
+          methods.post?.requestBody?.content,
+        )
         if (methods.get) {
-          console.log(
-            'method2',
-            methods.get.responses['200'].content['application/json'],
-          )
           queries.push({ name: methods.get.operationId, tag })
         }
 
@@ -214,16 +256,49 @@ class Generator {
     })
   }
 
+   extractRequestBodyParams(requestBody: { content: { [mimeType: string]: { schema: Schema } } }) {
+    const params = [];
+    const content = requestBody.content || {};
+  
+    for (const [mimeType, mediaTypeObject] of Object.entries(content)) {
+      const schema = mediaTypeObject?.schema || {};
+      this.extractParamsFromSchema(schema, params);
+    }
+  
+    return params;
+  }
+
+   extractParamsFromSchema(schema: Schema, params: string[], parentKey: string = '') {
+    const properties = schema.properties || {};
+    
+    for (const [param, details] of Object.entries(properties)) {
+      const fullParamName = parentKey ? `${parentKey}.${param}` : param;
+  
+      if (details.type === 'object' && details.properties) {
+        this.extractParamsFromSchema(details, params, fullParamName);
+      } else if (details.type === 'array' && details.items) {
+        if (details.items.type === 'object' && details.items.properties) {
+          this.extractParamsFromSchema(details.items, params, `${fullParamName}[]`);
+        } else {
+          params.push(`${fullParamName}[]`);
+        }
+      } else {
+        params.push(fullParamName);
+      }
+    }
+  }
+
   async generateSchemaAndResolver(): Promise<void> {
     for (const file of this.specDirFiles) {
       const parsedSpec = await this.parseSpec(file)
 
-      console.log('parsed spec', parsedSpec)
+      //console.log('parsed spec', parsedSpec)
 
        const serviceId = parsedSpec['x-service-id']
         if (!serviceId)
          throw new Error('Missing serviceId in this format x-service-id')
 
+      
        this.generateGraphqlFoldersForService(serviceId)
 
       const templateSource = readFile(this.getQueryTemplate())
@@ -231,6 +306,8 @@ class Generator {
 
       const resolverTemplateSource =  readFile(this.getResolverTemplate())
       const resolverTemp = Handlebars.compile(resolverTemplateSource)
+      
+    
 
       this.generateSchema(
         serviceId,

@@ -1,6 +1,6 @@
 
  
-export const  convertSchemaToTypeScript = (schema, interfaceName = 'RootObject') => {
+export const  convertSchemaToTypeDef = (schema, interfaceName = 'RootObject') => {
     let output = '';
     const interfaces = new Set();
   

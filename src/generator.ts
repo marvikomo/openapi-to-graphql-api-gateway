@@ -3,6 +3,7 @@ import path from 'path'
 import OASNormalize from 'oas-normalize'
 import { loadYaml, convertToOas3 } from './oas'
 import * as Handlebars from 'handlebars'
+import CircularJSON from 'circular-json'
 
 import {
   createFolder,
@@ -15,43 +16,42 @@ import {
 } from './helper'
 
 interface OpenAPI {
-  openapi: string;
+  openapi: string
   info: {
-    title: string;
-    version: string;
-  };
+    title: string
+    version: string
+  }
   paths: {
     [key: string]: {
-      [method: string]: PathMethod;
-    };
-  };
+      [method: string]: PathMethod
+    }
+  }
 }
 
-
 interface PathMethod {
-  operationId: string;
+  operationId: string
   requestBody?: {
     content: {
       [mimeType: string]: {
-        schema: Schema;
-      };
-    };
-  };
+        schema: Schema
+      }
+    }
+  }
 }
 
 interface Schema {
-  type?: string;
+  type?: string
   properties?: {
-    [key: string]: Schema;
-  };
-  items?: Schema;
+    [key: string]: Schema
+  }
+  items?: Schema
+  required?: string[]
 }
 
 interface Operation {
-  operationId: string;
-  params: string[];
+  operationId: string
+  params: string[]
 }
-
 
 const Modules = {}
 enum GenerationType {
@@ -83,7 +83,7 @@ class Generator {
         }
       }
 
-      console.log("xxx", this.specDirFiles)
+      console.log('xxx', this.specDirFiles)
     } catch (error) {
       console.error('Error reading directory:', error)
     }
@@ -206,20 +206,24 @@ class Generator {
     Object.entries(groupedByTags).forEach(([tag, paths]) => {
       // console.log("path", methods)
       Object.entries(paths).forEach(([path, methods]) => {
-        console.log(
-          'method2',
-          methods,
-        )
-        console.log(
-          'method2',
-          this.extractRequestBodyParams(methods.post?.requestBody),
-        )
+        // console.log(
+        //   'method2',
+        //   this.extractRequestBodyParams(methods.post?.requestBody),
+        // )
         if (methods.get) {
           queries.push({ name: methods.get.operationId, tag })
         }
 
         if (methods.post) {
-          mutations.push({ name: methods.post.operationId, tag })
+          const extractedRequestBody = this.extractRequestBodyParams(
+            methods.post?.requestBody,
+          )
+          console.log('arg str', extractedRequestBody)
+          mutations.push({
+            name: methods.post.operationId,
+            tag,
+            extractedRequestBody,
+          })
         }
       })
 
@@ -256,34 +260,80 @@ class Generator {
     })
   }
 
-   extractRequestBodyParams(requestBody: { content: { [mimeType: string]: { schema: Schema } } }): string[] {
-    const params: string[] = [];
-    const content = requestBody?.content || {};
-  
-    for (const [mimeType, mediaTypeObject] of Object.entries(content)) {
-      const schema = mediaTypeObject.schema || {};
-      this.extractParamsFromSchema(schema, params);
-    }
-  
-    return params;
+  generateArgsString = (args) => {
+    return args.map((arg) => `${arg.name}: ${arg.type}`).join(', ')
   }
 
-   extractParamsFromSchema(schema: Schema, params: string[], parentKey: string = ''): void {
-    const properties = schema.properties || {};
-    
+  extractRequestBodyParams(requestBody: {
+    content: { [mimeType: string]: { schema: Schema } }
+  }): string[] {
+    const params: string[] = []
+    const content = requestBody?.content || {}
+
+    //console.log('exxx', CircularJSON.stringify(content, null, 2))
+
+    for (const [mimeType, mediaTypeObject] of Object.entries(content)) {
+      const schema = mediaTypeObject.schema || {}
+      let fields =  this.extractParamsFromSchema(schema, params)
+      console.log("filds", fields)
+    }
+
+    return params
+  }
+
+  parseType(property: any, seenSchemas: Set<string> = new Set()): string {
+    if (property.$ref) {
+      const refType = property.$ref.split('/').pop();
+      if (seenSchemas.has(refType!)) {
+          return refType!;
+      }
+      seenSchemas.add(refType!);
+      return refType!;
+  }
+
+  if (property.type === 'array' && property.items) {
+      return `${this.parseType(property.items, seenSchemas)}[]`;
+  } else if (property.type === 'object' && property.properties) {
+      return `{ ${Object.entries(property.properties).map(([key, value]) => `${key}: ${this.parseType(value, seenSchemas)}`).join('; ')} }`;
+  }
+  return property.type;
+  }
+
+  extractParamsFromSchema(
+    schema: Schema,
+    params: string[],
+    parentKey: string = '',
+  ): any {
+    const properties = schema.properties || {}
+    const requiredProperties = schema.required || []
+
+    const fields = Object.entries(properties).map(([key, property]) => {
+      const type = this.parseType(property)
+      const isOptional = requiredProperties.includes(key) ? '' : '?'
+      return `${key}${isOptional}: ${type}`
+    }).join(';\n  ')
+
+    return `interface funn {
+      ${fields}
+    }`;
+
     for (const [param, details] of Object.entries(properties)) {
-      const fullParamName = parentKey ? `${parentKey}.${param}` : param;
-  
+      const fullParamName = parentKey ? `${parentKey}.${param}` : param
+
       if (details.type === 'object' && details.properties) {
-        this.extractParamsFromSchema(details, params, fullParamName);
+        this.extractParamsFromSchema(details, params, fullParamName)
       } else if (details.type === 'array' && details.items) {
         if (details.items.type === 'object' && details.items.properties) {
-          this.extractParamsFromSchema(details.items, params, `${fullParamName}[]`);
+          this.extractParamsFromSchema(
+            details.items,
+            params,
+            `${fullParamName}[]`,
+          )
         } else {
-          params.push(`${fullParamName}[]`);
+          params.push(`${fullParamName}[]: ${details.items.type}`)
         }
       } else {
-        params.push(fullParamName);
+        params.push(`${fullParamName}: ${details.type}`)
       }
     }
   }
@@ -294,20 +344,17 @@ class Generator {
 
       //console.log('parsed spec', parsedSpec)
 
-       const serviceId = parsedSpec['x-service-id']
-        if (!serviceId)
-         throw new Error('Missing serviceId in this format x-service-id')
+      const serviceId = parsedSpec['x-service-id']
+      if (!serviceId)
+        throw new Error('Missing serviceId in this format x-service-id')
 
-      
-       this.generateGraphqlFoldersForService(serviceId)
+      this.generateGraphqlFoldersForService(serviceId)
 
       const templateSource = readFile(this.getQueryTemplate())
       const template = Handlebars.compile(templateSource)
 
-      const resolverTemplateSource =  readFile(this.getResolverTemplate())
+      const resolverTemplateSource = readFile(this.getResolverTemplate())
       const resolverTemp = Handlebars.compile(resolverTemplateSource)
-      
-    
 
       this.generateSchema(
         serviceId,
@@ -315,10 +362,17 @@ class Generator {
         template,
         GenerationType.Query,
         this.getQueryOutPathForServiceId(serviceId),
-        'schema.ts'
+        'schema.ts',
       )
 
-      this.generateSchema(serviceId, this.groupSpecPathsByTags(this.getSpecPaths(parsedSpec)), resolverTemp,  GenerationType.Resolver,  this.getResolverOutPathForServiceId(serviceId), 'resolver.ts')
+      this.generateSchema(
+        serviceId,
+        this.groupSpecPathsByTags(this.getSpecPaths(parsedSpec)),
+        resolverTemp,
+        GenerationType.Resolver,
+        this.getResolverOutPathForServiceId(serviceId),
+        'resolver.ts',
+      )
     }
   }
 }

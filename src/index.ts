@@ -37,6 +37,13 @@ import OASNormalize from 'oas-normalize';
 
 //TODO format operationId to be unique
 const convert = async () => {
+
+  const parsedSpec = loadYaml( "src/specs/test2.yaml")
+  const cov = await convertToOas3(parsedSpec)
+
+  console.log("cov", cov.paths['/product'].get)
+  
+
     const oas1 = new OASNormalize(
         "src/specs/test2.yaml",
         { enablePaths: true }
@@ -51,7 +58,8 @@ const convert = async () => {
     const api: any = await oas1.deref();
 
 
-    console.log("normalized", api)
+    console.log("normalized", api.paths['/product'].get)
+    return
    // const ap2 = await oas2.deref();
     //console.log("API", api)
     //Path to Response

@@ -52,3 +52,5 @@ export const removeServiceSuffix = (str) =>{
   // from the end of the string. The 'i' flag makes the operation case-insensitive.
   return str.replace(/[\W_]*service$/i, '');
 }
+
+

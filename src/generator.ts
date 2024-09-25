@@ -215,14 +215,11 @@ class Generator {
         }
 
         if (methods.post) {
-          const extractedRequestBody = this.extractRequestBodyParams(
-            methods.post?.requestBody,
-          )
-          console.log('arg str', extractedRequestBody)
+        
+         
           mutations.push({
             name: methods.post.operationId,
-            tag,
-            extractedRequestBody,
+            tag
           })
         }
       })
@@ -264,22 +261,7 @@ class Generator {
     return args.map((arg) => `${arg.name}: ${arg.type}`).join(', ')
   }
 
-  extractRequestBodyParams(requestBody: {
-    content: { [mimeType: string]: { schema: Schema } }
-  }): string[] {
-    const params: string[] = []
-    const content = requestBody?.content || {}
 
-    //console.log('exxx', CircularJSON.stringify(content, null, 2))
-
-    for (const [mimeType, mediaTypeObject] of Object.entries(content)) {
-      const schema = mediaTypeObject.schema || {}
-      let fields =  this.extractParamsFromSchema(schema, params)
-      console.log("filds", fields)
-    }
-
-    return params
-  }
 
   parseType(property: any, seenSchemas: Set<string> = new Set()): string {
     if (property.$ref) {
@@ -299,44 +281,7 @@ class Generator {
   return property.type;
   }
 
-  extractParamsFromSchema(
-    schema: Schema,
-    params: string[],
-    parentKey: string = '',
-  ): any {
-    const properties = schema.properties || {}
-    const requiredProperties = schema.required || []
 
-    const fields = Object.entries(properties).map(([key, property]) => {
-      const type = this.parseType(property)
-      const isOptional = requiredProperties.includes(key) ? '' : '?'
-      return `${key}${isOptional}: ${type}`
-    }).join(';\n  ')
-
-    return `interface funn {
-      ${fields}
-    }`;
-
-    for (const [param, details] of Object.entries(properties)) {
-      const fullParamName = parentKey ? `${parentKey}.${param}` : param
-
-      if (details.type === 'object' && details.properties) {
-        this.extractParamsFromSchema(details, params, fullParamName)
-      } else if (details.type === 'array' && details.items) {
-        if (details.items.type === 'object' && details.items.properties) {
-          this.extractParamsFromSchema(
-            details.items,
-            params,
-            `${fullParamName}[]`,
-          )
-        } else {
-          params.push(`${fullParamName}[]: ${details.items.type}`)
-        }
-      } else {
-        params.push(`${fullParamName}: ${details.type}`)
-      }
-    }
-  }
 
   async generateSchemaAndResolver(): Promise<void> {
     for (const file of this.specDirFiles) {

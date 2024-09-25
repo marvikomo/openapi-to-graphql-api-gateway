@@ -58,4 +58,38 @@ export const  convertSchemaToTypeDef = (schema, interfaceName = 'RootObject') =>
   
     return Array.from(interfaces).join('') + output;
   }
-  
+
+
+
+  export const generateParamsTypeDef = (parameters) => {
+    let queryParamsInterface = 'interface QueryParams {\n';
+    let pathParamsInterface = 'interface PathParams {\n';
+    
+    parameters.forEach(param => {
+      const typeName = mapSchemaTypeToGraphQlType(param.schema);
+      const optional = param.required ? '' : '?';
+      const paramString = `  ${param.name}${optional}: ${typeName};\n`;
+      
+      if (param.in === 'query') {
+        queryParamsInterface += paramString;
+      } else if (param.in === 'path') {
+        pathParamsInterface += paramString;
+      }
+    });
+    
+    queryParamsInterface += '}\n\n';
+    pathParamsInterface += '}\n';
+    
+    return queryParamsInterface + pathParamsInterface;
+  }
+
+  const mapSchemaTypeToGraphQlType = (schemaType) => {
+    if (schemaType.type === 'integer') {
+        return 'number';
+      } else if (schemaType.type === 'string') {
+        return 'string';
+      } else if (schemaType.type === 'array') {
+        return 'any[]'; // We don't have enough information about the array items
+      }
+      return 'any'; // Default to 'any' for unknown types
+  }

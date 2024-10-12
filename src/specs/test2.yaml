@@ -48,7 +48,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Productx'
+                $ref: '#/components/schemas/ProductItems'
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '401':
@@ -178,8 +178,7 @@ components:
           type: string
         price:
           type: number
-        otherItems:
-          $ref: '#/components/schemas/OtherItems'
+       
        
     
     OtherItems:
@@ -189,6 +188,10 @@ components:
         type: string
        name:
         type: string
+       someThing:
+        type: array
+        items:
+          $ref: '#/components/schemas/Product'
 
     Products:
       type: object

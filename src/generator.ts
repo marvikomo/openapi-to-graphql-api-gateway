@@ -188,6 +188,109 @@ class Generator {
     return path.join(__dirname, Templates.Resolver)
   }
 
+  convertSchemaToGraphQLTypes(schema, typeName = 'RootObject') {
+    const types = [];
+    const processedTypes = new Set();
+  
+    function processSchema(prop, propName) {
+      if (!prop) return 'String'; // Default type if prop is undefined
+  
+      if (prop.$ref) {
+        // Handle references if present
+        const refTypeName = prop.$ref.split('/').pop();
+        return refTypeName;
+      }
+  
+      if (prop.type === 'object' || prop.properties) {
+        const subTypeName = capitalize(propName);
+        if (processedTypes.has(subTypeName)) {
+          return subTypeName;
+        }
+        processedTypes.add(subTypeName);
+  
+        const fields = [];
+        const requiredFields = prop.required || [];
+  
+        for (const [key, value] of Object.entries(prop.properties || {})) {
+          fields.push({
+            name: key,
+            type: getType(value, key),
+            required: requiredFields.includes(key),
+          });
+        }
+  
+        types.push({
+          name: subTypeName,
+          fields,
+        });
+  
+        return subTypeName;
+      } else if (prop.type === 'array') {
+        const itemType = getType(prop.items, propName + 'Item');
+        return `[${itemType}]`;
+      } else {
+        return getScalarType(prop.type);
+      }
+    }
+  
+    function getType(prop, propName = '') {
+      if (prop.$ref) {
+        // Handle references if present
+        const refTypeName = prop.$ref.split('/').pop();
+        return refTypeName;
+      }
+  
+      switch (prop.type) {
+        case 'string':
+          return 'String';
+        case 'number':
+          return 'Float';
+        case 'integer':
+          return 'Int';
+        case 'boolean':
+          return 'Boolean';
+        case 'array':
+          return processSchema(prop, propName);
+        case 'object':
+          return processSchema(prop, propName);
+        default:
+          return 'String'; // Default type
+      }
+    }
+  
+    function getScalarType(type) {
+      switch (type) {
+        case 'string':
+          return 'String';
+        case 'number':
+          return 'Float';
+        case 'integer':
+          return 'Int';
+        case 'boolean':
+          return 'Boolean';
+        default:
+          return 'String';
+      }
+    }
+  
+    function capitalize(name) {
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+  
+    // Start processing from the root schema
+    const rootType = processSchema(schema, typeName);
+  
+    // If the root type is not an object, create an alias
+    if (rootType !== typeName) {
+      types.push({
+        name: typeName,
+        aliasFor: rootType,
+      });
+    }
+  
+    return types;
+  }
+
   async generateSchema(
     serviceId,
     groupedByTags,
@@ -211,6 +314,7 @@ class Generator {
         //   this.extractRequestBodyParams(methods.post?.requestBody),
         // )
         if (methods.get) {
+          
           queries.push({ name: methods.get.operationId, tag })
         }
 

@@ -337,6 +337,23 @@ class Generator {
     }
   }
 
+ getOperationParameters(operation) {
+    const parameters = operation.parameters || [];
+    const queryParams = [];
+    const pathParams = [];
+  
+    parameters.forEach((param) => {
+      const paramInfo = {
+        name: param.name,
+        type: this.mapOpenApiTypeToGraphQLType(param.schema.type),
+        required: param.required || false,
+      };
+  
+    });
+  
+    return { queryParams, pathParams };
+  }
+
   
   
 

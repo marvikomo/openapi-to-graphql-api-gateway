@@ -322,6 +322,24 @@ class Generator {
     return Object.values(typeMap)
   }
 
+  mapOpenApiTypeToGraphQLType(type) {
+    switch (type) {
+      case 'string':
+        return 'String';
+      case 'number':
+        return 'Float';
+      case 'integer':
+        return 'Int';
+      case 'boolean':
+        return 'Boolean';
+      default:
+        return 'String';
+    }
+  }
+
+  
+  
+
   async generateSchema(
     serviceId,
     groupedByTags,

@@ -300,6 +300,16 @@ class Generator {
     return null;
   }
 
+   deduplicateTypes(types) {
+    const typeMap = {};
+    types.forEach((type) => {
+      if (!typeMap[type.name]) {
+        typeMap[type.name] = type;
+      }
+    });
+    return Object.values(typeMap);
+  }
+
   
 
   async generateSchema(

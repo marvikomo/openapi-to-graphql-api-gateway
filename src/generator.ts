@@ -413,6 +413,7 @@ class Generator {
             name: methods.get.operationId,
             tag,
             responseType: responseTypeName,
+            arguments: args,
           })
         }
 

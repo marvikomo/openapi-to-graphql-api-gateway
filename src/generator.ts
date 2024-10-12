@@ -349,6 +349,11 @@ class Generator {
         required: param.required || false,
       };
   
+      if (param.in === 'query') {
+        queryParams.push(paramInfo);
+      } else if (param.in === 'path') {
+        pathParams.push(paramInfo);
+      }
     });
   
     return { queryParams, pathParams };

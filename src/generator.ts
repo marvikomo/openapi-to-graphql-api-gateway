@@ -291,6 +291,17 @@ class Generator {
     return types;
   }
 
+   getResponseSchema(responses) {
+    const successResponse = responses['200'] || responses['201'];
+    if (successResponse && successResponse.content) {
+      const contentType = Object.keys(successResponse.content)[0];
+      return successResponse.content[contentType].schema;
+    }
+    return null;
+  }
+
+  
+
   async generateSchema(
     serviceId,
     groupedByTags,
@@ -301,6 +312,9 @@ class Generator {
   ) {
     let queries = []
     let mutations = []
+
+    const types = [];
+    const processedTypes = new Set();
 
     if (!template) {
       throw new Error('No valid template')
@@ -314,7 +328,19 @@ class Generator {
         //   this.extractRequestBodyParams(methods.post?.requestBody),
         // )
         if (methods.get) {
-          
+          const operationId = methods.get.operationId;
+          const responseSchema = this.getResponseSchema(methods.get.responses);
+         
+          console.log("response", operationId)
+          console.dir(responseSchema, { depth: null, colors: true })
+         const responseTypeName = operationId + 'Response';
+
+         const responseTypes = this.convertSchemaToGraphQLTypes(responseSchema, responseTypeName);
+          console.log("response types")
+         console.dir(responseTypes, { depth: null, colors: true })
+
+         
+          return
           queries.push({ name: methods.get.operationId, tag })
         }
 

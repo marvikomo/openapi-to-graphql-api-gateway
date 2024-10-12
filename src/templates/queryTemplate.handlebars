@@ -8,14 +8,12 @@ const {{tag}}_schema = `#graphql
   scalar Upload
   scalar JSON
 
-  type Query {
+    type Query {
     {{#each queries}}
     {{this.name}}(
-      {{#if this.arguments}}
       {{#each this.arguments}}
       {{this.name}}: {{this.type}}{{#if this.required}}!{{/if}}{{#unless @last}}, {{/unless}}
       {{/each}}
-      {{/if}}
     ): {{this.responseType}}
     {{/each}}
   }
@@ -23,6 +21,9 @@ const {{tag}}_schema = `#graphql
   type Mutation {
     {{#each mutations}}
     {{this.name}}(
+      {{#each this.arguments}}
+      {{this.name}}: {{this.type}}{{#if this.required}}!{{/if}}, 
+      {{/each}}
       {{#if this.inputType}}
       input: {{this.inputType}}{{#if this.required}}!{{/if}}
       {{/if}}

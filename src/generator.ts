@@ -322,6 +322,46 @@ class Generator {
     return Object.values(typeMap)
   }
 
+  mapOpenApiTypeToGraphQLType(type) {
+    switch (type) {
+      case 'string':
+        return 'String';
+      case 'number':
+        return 'Float';
+      case 'integer':
+        return 'Int';
+      case 'boolean':
+        return 'Boolean';
+      default:
+        return 'String';
+    }
+  }
+
+ getOperationParameters(operation) {
+    const parameters = operation.parameters || [];
+    const queryParams = [];
+    const pathParams = [];
+  
+    parameters.forEach((param) => {
+      const paramInfo = {
+        name: param.name,
+        type: this.mapOpenApiTypeToGraphQLType(param.schema.type),
+        required: param.required || false,
+      };
+  
+      if (param.in === 'query') {
+        queryParams.push(paramInfo);
+      } else if (param.in === 'path') {
+        pathParams.push(paramInfo);
+      }
+    });
+  
+    return { queryParams, pathParams };
+  }
+
+  
+  
+
   async generateSchema(
     serviceId,
     groupedByTags,
@@ -363,10 +403,17 @@ class Generator {
           console.log('response types')
           console.dir(responseTypes, { depth: null, colors: true })
 
+
+          const { queryParams, pathParams } = this.getOperationParameters(methods.get);
+          const args = [...pathParams, ...queryParams];
+
+
+
           queries.push({
             name: methods.get.operationId,
             tag,
             responseType: responseTypeName,
+            arguments: args,
           })
         }
 
@@ -382,11 +429,15 @@ class Generator {
 
           types.push(...requestTypes, ...responseTypes)
 
+          const { queryParams, pathParams } = this.getOperationParameters(methods.post);
+          const args = [...pathParams, ...queryParams];
+
           mutations.push({
             name: methods.post.operationId,
             tag,
             inputType: requestTypeName,
             responseType: responseTypeName,
+            arguments: args,
           })
         }
       })

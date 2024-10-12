@@ -5,6 +5,10 @@ import { loadYaml, convertToOas3 } from './oas'
 import * as Handlebars from 'handlebars'
 import CircularJSON from 'circular-json'
 
+Handlebars.registerHelper('eq', function (arg1, arg2) {
+  return arg1 === arg2;
+});
+
 import {
   createFolder,
   toPascalCase,
@@ -367,10 +371,21 @@ class Generator {
         }
 
         if (methods.post) {
-          const operationId = methods.get.operationId
+          const operationId = methods.post.operationId
+          const requestSchema = this.getRequestSchema(methods.post.requestBody);
+          const requestTypeName = operationId + 'Input';
+          const requestTypes = this.convertSchemaToGraphQLTypes(requestSchema, requestTypeName);
+
+          const responseSchema = this.getResponseSchema(methods.post.responses);
+          const responseTypeName = operationId + 'Response';
+          const responseTypes = this.convertSchemaToGraphQLTypes(responseSchema, responseTypeName);
+
+          types.push(...requestTypes, ...responseTypes)
+
           mutations.push({
             name: methods.post.operationId,
             tag,
+            inputType: requestTypeName,
             responseType: responseTypeName,
           })
         }

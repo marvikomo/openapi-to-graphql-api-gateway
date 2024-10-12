@@ -1,6 +1,8 @@
 /** @format */
 
- directive @auth on FIELD_DEFINITION
+const {{tag}}_schema = `#graphql
+
+  directive @auth on FIELD_DEFINITION
   directive @userType(requires: [UserType]) on FIELD_DEFINITION
 
   scalar Upload
@@ -51,7 +53,7 @@
   {{/if}}
     {{/if}}
   {{/each}}
-
+  
 `;
 
 export default {{tag}}_schema;

@@ -10,31 +10,28 @@ const {{tag}}_schema = `#graphql
 
   type Query {
     {{#each queries}}
-    {{this.name}}(firstName: String, lastName: String): UserResponse
+    {{this.name}}(firstName: String, lastName: String): {{ this.responseType }}
     {{/each}}
   }
 
   type Mutation {
     {{#each mutations}}
-    {{this.name}}(firstName: String, lastName: String): UserResponse
+    {{this.name}}(firstName: String, lastName: String): {{ this.responseType }}
     {{/each}}
   }
 
-  type UserObject {
-    firstName: String
-    lastName: String
+    {{#each types}}
+    {{#if this.aliasFor}}
+  type {{this.name}} = {{this.aliasFor}}
+    {{else}}
+  type {{this.name}} {
+      {{#each this.fields}}
+    {{this.name}}: {{this.type}}{{#if this.required}}!{{/if}}
+      {{/each}}
   }
-
-  type UserResponse {
-    status: String
-    data: UserObject
-    message: String
-  }
-
-  type Response {
-    status: String
-    message: String
-  }
+    {{/if}}
+  {{/each}}
+  
 `;
 
 export default {{tag}}_schema;

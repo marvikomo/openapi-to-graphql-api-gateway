@@ -189,128 +189,134 @@ class Generator {
   }
 
   convertSchemaToGraphQLTypes(schema, typeName = 'RootObject') {
-    const types = [];
-    const processedTypes = new Set();
-  
+    const types = []
+    const processedTypes = new Set()
+
     function processSchema(prop, propName) {
-      if (!prop) return 'String'; // Default type if prop is undefined
-  
+      if (!prop) return 'String' // Default type if prop is undefined
+
       if (prop.$ref) {
         // Handle references if present
-        const refTypeName = prop.$ref.split('/').pop();
-        return refTypeName;
+        const refTypeName = prop.$ref.split('/').pop()
+        return refTypeName
       }
-  
+
       if (prop.type === 'object' || prop.properties) {
-        const subTypeName = capitalize(propName);
+        const subTypeName = capitalize(propName)
         if (processedTypes.has(subTypeName)) {
-          return subTypeName;
+          return subTypeName
         }
-        processedTypes.add(subTypeName);
-  
-        const fields = [];
-        const requiredFields = prop.required || [];
-  
+        processedTypes.add(subTypeName)
+
+        const fields = []
+        const requiredFields = prop.required || []
+
         for (const [key, value] of Object.entries(prop.properties || {})) {
           fields.push({
             name: key,
             type: getType(value, key),
             required: requiredFields.includes(key),
-          });
+          })
         }
-  
+
         types.push({
           name: subTypeName,
           fields,
-        });
-  
-        return subTypeName;
+        })
+
+        return subTypeName
       } else if (prop.type === 'array') {
-        const itemType = getType(prop.items, propName + 'Item');
-        return `[${itemType}]`;
+        const itemType = getType(prop.items, propName + 'Item')
+        return `[${itemType}]`
       } else {
-        return getScalarType(prop.type);
+        return getScalarType(prop.type)
       }
     }
-  
+
     function getType(prop, propName = '') {
       if (prop.$ref) {
         // Handle references if present
-        const refTypeName = prop.$ref.split('/').pop();
-        return refTypeName;
+        const refTypeName = prop.$ref.split('/').pop()
+        return refTypeName
       }
-  
+
       switch (prop.type) {
         case 'string':
-          return 'String';
+          return 'String'
         case 'number':
-          return 'Float';
+          return 'Float'
         case 'integer':
-          return 'Int';
+          return 'Int'
         case 'boolean':
-          return 'Boolean';
+          return 'Boolean'
         case 'array':
-          return processSchema(prop, propName);
+          return processSchema(prop, propName)
         case 'object':
-          return processSchema(prop, propName);
+          return processSchema(prop, propName)
         default:
-          return 'String'; // Default type
+          return 'String' // Default type
       }
     }
-  
+
     function getScalarType(type) {
       switch (type) {
         case 'string':
-          return 'String';
+          return 'String'
         case 'number':
-          return 'Float';
+          return 'Float'
         case 'integer':
-          return 'Int';
+          return 'Int'
         case 'boolean':
-          return 'Boolean';
+          return 'Boolean'
         default:
-          return 'String';
+          return 'String'
       }
     }
-  
+
     function capitalize(name) {
-      return name.charAt(0).toUpperCase() + name.slice(1);
+      return name.charAt(0).toUpperCase() + name.slice(1)
     }
-  
+
     // Start processing from the root schema
-    const rootType = processSchema(schema, typeName);
-  
+    const rootType = processSchema(schema, typeName)
+
     // If the root type is not an object, create an alias
     if (rootType !== typeName) {
       types.push({
         name: typeName,
         aliasFor: rootType,
-      });
+      })
     }
-  
-    return types;
+
+    return types
   }
 
-   getResponseSchema(responses) {
-    const successResponse = responses['200'] || responses['201'];
+  getResponseSchema(responses) {
+    const successResponse = responses['200'] || responses['201']
     if (successResponse && successResponse.content) {
-      const contentType = Object.keys(successResponse.content)[0];
-      return successResponse.content[contentType].schema;
+      const contentType = Object.keys(successResponse.content)[0]
+      return successResponse.content[contentType].schema
+    }
+    return null
+  }
+
+ getRequestSchema(requestBody) {
+    if (requestBody && requestBody.content) {
+      const contentType = Object.keys(requestBody.content)[0];
+      return requestBody.content[contentType].schema;
     }
     return null;
   }
 
-   deduplicateTypes(types) {
-    const typeMap = {};
+  deduplicateTypes(types) {
+    const typeMap = {}
     types.forEach((type) => {
       if (!typeMap[type.name]) {
-        typeMap[type.name] = type;
+        typeMap[type.name] = type
       }
-    });
-    return Object.values(typeMap);
+    })
+    return Object.values(typeMap)
   }
-
-  
 
   async generateSchema(
     serviceId,
@@ -323,8 +329,8 @@ class Generator {
     let queries = []
     let mutations = []
 
-    const types = [];
-    const processedTypes = new Set();
+    const types = []
+    const processedTypes = new Set()
 
     if (!template) {
       throw new Error('No valid template')
@@ -338,36 +344,45 @@ class Generator {
         //   this.extractRequestBodyParams(methods.post?.requestBody),
         // )
         if (methods.get) {
-          const operationId = methods.get.operationId;
-          const responseSchema = this.getResponseSchema(methods.get.responses);
-         
-          console.log("response", operationId)
+          const operationId = methods.get.operationId
+          const responseSchema = this.getResponseSchema(methods.get.responses)
+
+          console.log('response', operationId)
           console.dir(responseSchema, { depth: null, colors: true })
-         const responseTypeName = operationId + 'Response';
+          const responseTypeName = operationId + 'Response'
 
-         const responseTypes = this.convertSchemaToGraphQLTypes(responseSchema, responseTypeName);
-          console.log("response types")
-         console.dir(responseTypes, { depth: null, colors: true })
+          const responseTypes = this.convertSchemaToGraphQLTypes(
+            responseSchema,
+            responseTypeName,
+          )
+          types.push(...responseTypes)
+          console.log('response types')
+          console.dir(responseTypes, { depth: null, colors: true })
 
-         
-          return
-          queries.push({ name: methods.get.operationId, tag })
+          queries.push({
+            name: methods.get.operationId,
+            tag,
+            responseType: responseTypeName,
+          })
         }
 
         if (methods.post) {
-        
-         
+          const operationId = methods.get.operationId
           mutations.push({
             name: methods.post.operationId,
-            tag
+            tag,
+            responseType: responseTypeName,
           })
         }
       })
 
+      // Deduplicate types
+      const uniqueTypes = this.deduplicateTypes(types)
+
       let schemaContent
 
       if (GenerationType.Query == generationType) {
-        schemaContent = template({ tag, queries, mutations })
+        schemaContent = template({ tag, queries, mutations , types: uniqueTypes})
       }
 
       if (GenerationType.Resolver == generationType) {
@@ -378,6 +393,7 @@ class Generator {
           tag,
           queries,
           mutations,
+          types: uniqueTypes
         })
       }
 
@@ -401,27 +417,25 @@ class Generator {
     return args.map((arg) => `${arg.name}: ${arg.type}`).join(', ')
   }
 
-
-
   parseType(property: any, seenSchemas: Set<string> = new Set()): string {
     if (property.$ref) {
-      const refType = property.$ref.split('/').pop();
+      const refType = property.$ref.split('/').pop()
       if (seenSchemas.has(refType!)) {
-          return refType!;
+        return refType!
       }
-      seenSchemas.add(refType!);
-      return refType!;
-  }
+      seenSchemas.add(refType!)
+      return refType!
+    }
 
-  if (property.type === 'array' && property.items) {
-      return `${this.parseType(property.items, seenSchemas)}[]`;
-  } else if (property.type === 'object' && property.properties) {
-      return `{ ${Object.entries(property.properties).map(([key, value]) => `${key}: ${this.parseType(value, seenSchemas)}`).join('; ')} }`;
+    if (property.type === 'array' && property.items) {
+      return `${this.parseType(property.items, seenSchemas)}[]`
+    } else if (property.type === 'object' && property.properties) {
+      return `{ ${Object.entries(property.properties)
+        .map(([key, value]) => `${key}: ${this.parseType(value, seenSchemas)}`)
+        .join('; ')} }`
+    }
+    return property.type
   }
-  return property.type;
-  }
-
-
 
   async generateSchemaAndResolver(): Promise<void> {
     for (const file of this.specDirFiles) {

@@ -429,11 +429,15 @@ class Generator {
 
           types.push(...requestTypes, ...responseTypes)
 
+          const { queryParams, pathParams } = this.getOperationParameters(methods.post);
+          const args = [...pathParams, ...queryParams];
+
           mutations.push({
             name: methods.post.operationId,
             tag,
             inputType: requestTypeName,
             responseType: responseTypeName,
+            arguments: args,
           })
         }
       })

@@ -8,7 +8,7 @@ import express from 'express';
 import http from 'http';
 import config from './app/config/config';
 import di from './app/config/di';
-import typeDefs from './app/graphql/queries';
+import typeDefs from './app/graphql/queriess';
 import resolvers from './app/graphql/resolvers';
 import { LoggerService } from './app/services/logger.service';
 

@@ -1,0 +1,81 @@
+openapi: 3.0.0
+info:
+  title: Example API with Inline Definitions
+  version: 1.0.0
+paths:
+  /products:
+    get:
+      summary: Fetch Products
+      description: Fetch products
+      operationId: fetchProducts
+      tags:
+        - product
+      parameters:
+        - name: size
+          in: query
+          description: Number of items to return
+          required: false
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: Page number to return
+          required: false
+          schema:
+            type: integer
+        - name: brand
+          in: query
+          description: Brand name
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        brand:
+                          type: string
+                        price:
+                          type: number
+                  total:
+                    type: integer
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string

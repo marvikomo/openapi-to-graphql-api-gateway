@@ -1,0 +1,236 @@
+openapi: 3.0.0
+info:
+  title: Example API with Reference Definitions
+  version: 1.0.0
+
+x-organization: myasoebi
+x-service-id: user2
+
+paths:
+  /products:
+    get:
+      summary: Fetch Products
+      description: Fetch products
+      operationId: fetchProducts
+      tags:
+        - product
+      parameters:
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/brand'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductItems'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /product:
+    get:
+      summary: Fetch Products
+      description: Fetch products
+      operationId: fetchProduct
+      tags:
+        - product
+      parameters:
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/brand'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductItems'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      summary: Fetch Products
+      description: Fetch products
+      operationId: fetchProduct
+      tags:
+        - product
+      parameters:
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/brand'
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Productx'
+
+      
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Productx'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  
+
+  /product/{productId}:
+    post:
+      summary: Fetch Products
+      description: Fetch products
+      operationId: fetchProduct
+      tags:
+        - product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Productx'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  parameters:
+    size:
+      name: size
+      in: query
+      description: Number of items to return
+      required: false
+      schema:
+        type: integer
+    page:
+      name: page
+      in: query
+      description: Page number to return
+      required: false
+      schema:
+        type: integer
+    brand:
+      name: brand
+      in: query
+      description: Brand name
+      required: false
+      schema:
+        type: string
+  schemas:
+    ProductItems:
+      type: object
+      properties:
+        productitems:
+          type: array
+          items:
+            $ref: '#/components/schemas/Productx'
+        productArray:
+          type: array
+          items:
+            $ref: '#/components/schemas/Productx'
+        total:
+          type: integer
+        products:
+          $ref: '#/components/schemas/Products'
+         
+
+    Productx:
+      type: array
+      items:
+        $ref: '#/components/schemas/Products'
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        brand:
+          type: string
+        price:
+          type: number
+       
+       
+    
+    OtherItems:
+      type: object
+      properties:
+       id:
+        type: string
+       name:
+        type: string
+       someThing:
+        type: array
+        items:
+          $ref: '#/components/schemas/Product'
+
+    Products:
+      type: object
+      properties:
+        id:
+          type: string
+        cuteName:
+          type: string
+        cuteBrand:
+          type: string
+        price:
+         type: number
+        otherItems:
+          $ref: '#/components/schemas/OtherItems'
+  responses:
+    InvalidRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string

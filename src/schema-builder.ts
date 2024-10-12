@@ -8,7 +8,7 @@ import Generator from "./generator"
 
 
 
-const parsed = loadYaml("src/specs/test.yaml")
+//const parsed = loadYaml("src/specs/test.yaml")
 
 
 //First, read the tags
@@ -38,112 +38,112 @@ const parsed = loadYaml("src/specs/test.yaml")
 //same for Post
 //Use it to generate the schema
 
-const getTags = (parsedSpec) => {
-  return parsedSpec?.tags
-}
+// const getTags = (parsedSpec) => {
+//   return parsedSpec?.tags
+// }
 
-const getPaths = (parsedSpec) => {
-    return parsedSpec?.paths
-}
+// const getPaths = (parsedSpec) => {
+//     return parsedSpec?.paths
+// }
 
-const groupPathsByTags = (paths) => {
+// const groupPathsByTags = (paths) => {
 
-    const groupedByTags = []
+//     const groupedByTags = []
 
- Object.entries(paths).forEach(([path, methods]) => {
-     Object.entries(methods).forEach(([method, details]) => {
-       if(details.tags) {
-        details.tags.forEach((tag) => {
-         if(!groupedByTags[tag]) {
-            groupedByTags[tag] = {}
-         }
-         if(!groupedByTags[tag][path]){
-            groupedByTags[tag][path] = {}
-         }
-         groupedByTags[tag][path][method] = details;
-        })
-       }
-     })
+//  Object.entries(paths).forEach(([path, methods]) => {
+//      Object.entries(methods).forEach(([method, details]) => {
+//        if(details.tags) {
+//         details.tags.forEach((tag) => {
+//          if(!groupedByTags[tag]) {
+//             groupedByTags[tag] = {}
+//          }
+//          if(!groupedByTags[tag][path]){
+//             groupedByTags[tag][path] = {}
+//          }
+//          groupedByTags[tag][path][method] = details;
+//         })
+//        }
+//      })
    
-});
+// });
 
-return groupedByTags
+// return groupedByTags
 
- //console.log("groupByTags", groupedByTags)
+//  //console.log("groupByTags", groupedByTags)
 
-}
+// }
 
-const convertPathsToGraphQLFields = (paths) => {
+// const convertPathsToGraphQLFields = (paths) => {
 
-}
+// }
 
-const getQueryOutputFolder = () => {
-    return path.join(__dirname, '../app/graphql/queries')
-}
+// const getQueryOutputFolder = () => {
+//     return path.join(__dirname, '../app/graphql/queries')
+// }
 
-const createQueryFolder = (outputFolder) => {
-    if(!fs.existsSync(outputFolder)){
-        fs.mkdirSync(outputFolder, {recursive: true})
-    }
-}
+// const createQueryFolder = (outputFolder) => {
+//     if(!fs.existsSync(outputFolder)){
+//         fs.mkdirSync(outputFolder, {recursive: true})
+//     }
+// }
 
-const generateSchemaAndResolverFiles = (groupedByTags) => {
-    const templatePath = path.join(__dirname, 'templates/schemaTemplate.handlebars');
-    const templateSource = fs.readFileSync(templatePath, 'utf8');
-    const template = Handlebars.compile(templateSource);
+// const generateSchemaAndResolverFiles = (groupedByTags) => {
+//     const templatePath = path.join(__dirname, 'templates/schemaTemplate.handlebars');
+//     const templateSource = fs.readFileSync(templatePath, 'utf8');
+//     const template = Handlebars.compile(templateSource);
 
-    let queries = []
-    let mutations = []
-    let guped =  Object.entries(groupedByTags)
+//     let queries = []
+//     let mutations = []
+//     let guped =  Object.entries(groupedByTags)
 
-    console.log("grouped", guped)
+//     console.log("grouped", guped)
 
-     const queryOutPutFolder = getQueryOutputFolder();
-    // console.log("output...", queryOutPutFolder)
-    createQueryFolder(queryOutPutFolder);
+//      const queryOutPutFolder = getQueryOutputFolder();
+//     // console.log("output...", queryOutPutFolder)
+//     createQueryFolder(queryOutPutFolder);
 
 
-    let entries = Object.entries(groupedByTags).forEach(([tag, paths]) => {
-       // console.log("path", methods)
-         Object.entries(paths).forEach(([path, methods]) => {
+//     let entries = Object.entries(groupedByTags).forEach(([tag, paths]) => {
+//        // console.log("path", methods)
+//          Object.entries(paths).forEach(([path, methods]) => {
            
-            if(methods.get) {
-                queries.push({name: methods.get.operationId, tag})
-            }
+//             if(methods.get) {
+//                 queries.push({name: methods.get.operationId, tag})
+//             }
 
-            if(methods.post) {
-                mutations.push({name: methods.post.operationId, tag})
-            }
-        })
+//             if(methods.post) {
+//                 mutations.push({name: methods.post.operationId, tag})
+//             }
+//         })
 
-         const schemaContent = template({ tag, queries, mutations });
-         //console.log("queries", queries)
+//          const schemaContent = template({ tag, queries, mutations });
+//          //console.log("queries", queries)
 
-        // const filename = `${tag}_schema.ts`;
+//         // const filename = `${tag}_schema.ts`;
 
-         const filename = path.join(queryOutPutFolder, `${tag}_schema.ts`);
-         if (!fs.existsSync(filename) || fs.readFileSync(filename, 'utf8') !== schemaContent) {
-            fs.writeFileSync(filename, schemaContent);
-            console.log(`Generated or updated schema file: ${filename}`);
-        } else {
-            console.log(`No changes detected for ${filename}, skipping update.`);
-        }
-         queries = []
-         mutations = []
+//          const filename = path.join(queryOutPutFolder, `${tag}_schema.ts`);
+//          if (!fs.existsSync(filename) || fs.readFileSync(filename, 'utf8') !== schemaContent) {
+//             fs.writeFileSync(filename, schemaContent);
+//             console.log(`Generated or updated schema file: ${filename}`);
+//         } else {
+//             console.log(`No changes detected for ${filename}, skipping update.`);
+//         }
+//          queries = []
+//          mutations = []
        
-    })
+//     })
 
-   // const schemaContent =  
+//    // const schemaContent =  
 
-   //console.log("entries", entries) 
-
-
-}
-
-const generateSchemas = (groupedByTags) => {
+//    //console.log("entries", entries) 
 
 
-}
+// }
+
+// const generateSchemas = (groupedByTags) => {
+
+
+// }
 
 
 const convert = async () => {
@@ -152,7 +152,7 @@ const convert = async () => {
     await generate.readFilesInDirectory();
     await generate.generateSchemaAndResolver();
     //console.log("ik", generate.specDirContent)
-    let parsedRes = await convertToOas3(parsed)
+    
 
     // console.log(parsedRes.paths)
     //let tags = getTags(parsedRes)

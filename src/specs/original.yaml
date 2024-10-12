@@ -462,6 +462,8 @@ components:
         - phone
         - password
       properties:
+       
+
         firstName:
           type: string
           format: string

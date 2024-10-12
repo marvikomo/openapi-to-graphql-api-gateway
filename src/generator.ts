@@ -403,6 +403,12 @@ class Generator {
           console.log('response types')
           console.dir(responseTypes, { depth: null, colors: true })
 
+
+          const { queryParams, pathParams } = this.getOperationParameters(methods.get);
+          const args = [...pathParams, ...queryParams];
+
+
+
           queries.push({
             name: methods.get.operationId,
             tag,

@@ -373,26 +373,36 @@ class Generator {
     let queries = []
     let mutations = []
 
-    const types = []
+
     const processedTypes = new Set()
 
     if (!template) {
       throw new Error('No valid template')
     }
-
+    console.dir(groupedByTags, { depth: null, colors: true })
     Object.entries(groupedByTags).forEach(([tag, paths]) => {
+      //now we loop through the groupedByTags and get the tag and paths which is something like this for example
+      // [
+      //   product: {
+      //     '/products': {
+      //       get: {
+      //         summary: 'Fetch Products',
+      //         description: 'Fetch products',
+      //         operationId: 'fetchProducts',
+      //         tags: [ 'product' ],
+
+      const types = []
       // console.log("path", methods)
       Object.entries(paths).forEach(([path, methods]) => {
-        // console.log(
-        //   'method2',
-        //   this.extractRequestBodyParams(methods.post?.requestBody),
-        // )
+
+        //Now we can simply just loop using foreach to get the path and method
+
         if (methods.get) {
           const operationId = methods.get.operationId
           const responseSchema = this.getResponseSchema(methods.get.responses)
 
-          console.log('response', operationId)
-          console.dir(responseSchema, { depth: null, colors: true })
+         // console.log('response', operationId)
+          //console.dir(responseSchema, { depth: null, colors: true })
           const responseTypeName = operationId + 'Response'
 
           const responseTypes = this.convertSchemaToGraphQLTypes(
@@ -400,8 +410,8 @@ class Generator {
             responseTypeName,
           )
           types.push(...responseTypes)
-          console.log('response types')
-          console.dir(responseTypes, { depth: null, colors: true })
+         // console.log('response types')
+         // console.dir(responseTypes, { depth: null, colors: true })
 
 
           const { queryParams, pathParams } = this.getOperationParameters(methods.get);

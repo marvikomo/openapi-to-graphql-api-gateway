@@ -8,8 +8,8 @@ import express from 'express';
 import http from 'http';
 import config from './app/config/config';
 import di from './app/config/di';
-import typeDefs from './app/graphql/queriess';
-import resolvers from './app/graphql/resolvers';
+import typeDefs from './app/graphqlss/queriess';
+import resolvers from './app/graphqlss/resolvers';
 import { LoggerService } from './app/services/logger.service';
 
 const logger: LoggerService = di.get('logger');

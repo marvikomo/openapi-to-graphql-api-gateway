@@ -86,8 +86,6 @@ class Generator {
           this.specDirFiles.push(filepath)
         }
       }
-
-      console.log('xxx', this.specDirFiles)
     } catch (error) {
       console.error('Error reading directory:', error)
     }

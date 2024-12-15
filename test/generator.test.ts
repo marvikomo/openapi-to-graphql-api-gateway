@@ -92,7 +92,83 @@ describe('Generator Class Tests', () => {
         });
       });
 
-      
+      describe('groupSpecPathsByTags', () => {
+        it('should group paths by tags', () => {
+          const paths = {
+            '/path1': {
+              get: {
+                summary: 'This is get ops',
+                description: 'test test',
+                'x-visibility': 'public',
+                operationId: 'operation1',
+                tags: ['tag1'],
+                responses: {
+
+                }
+              },
+            },
+            '/path2': {
+              post: { 
+                summary: 'This is post ops',
+                description: 'test test',
+                'x-visibility': 'public',
+                operationId: 'operation2',
+                tags: ['tag2'],
+                responses: {
+
+                }
+               },
+            },
+          };
+    
+          const grouped = generator.groupSpecPathsByTags(paths);
+
+          const transformedGrouped = Object.keys(grouped).reduce((acc, key) => {
+            acc[key] = grouped[key];
+            return acc;
+          }, {});
+
+          console.log("Grouped Output:", transformedGrouped)
+
+          console.log("Grouped Output:", JSON.stringify(transformedGrouped, null, 2));
+    
+          expect(transformedGrouped).toEqual({
+            tag1: {
+              '/path1': {
+                get: { 
+                  summary: 'This is get ops',
+                  description: 'test test',
+                  'x-visibility': 'public',
+                  operationId: 'operation1',
+                  tags: ['tag1'],
+                  responses: {
+  
+                  }
+                 },
+              },
+            },
+            tag2: {
+              '/path2': {
+                post: { 
+                  summary: 'This is post ops',
+                  description: 'test test',
+                  'x-visibility': 'public',
+                  operationId: 'operation2',
+                  tags: ['tag2'],
+                  responses: {
+  
+                  }
+                 },
+              },
+            },
+          });
+
+
+        });
+      });
+    
+
+
 
 
 

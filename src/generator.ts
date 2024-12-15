@@ -108,6 +108,7 @@ class Generator {
   }
 
   groupSpecPathsByTags = (paths) => {
+    console.log("grouped", paths)
     const groupedByTags = []
     Object.entries(paths).forEach(([path, methods]) => {
       Object.entries(methods).forEach(([method, details]) => {
@@ -124,6 +125,8 @@ class Generator {
         }
       })
     })
+
+    console.log("groupedafter", groupedByTags)
 
     return groupedByTags
   }
@@ -515,8 +518,6 @@ class Generator {
   async generateSchemaAndResolver(): Promise<void> {
     for (const file of this.specDirFiles) {
       const parsedSpec = await this.parseSpec(file)
-      console.log('parsed file', file)
-      console.log('parsed spec', parsedSpec)
 
       const serviceId = parsedSpec['x-service-id']
       if (!serviceId)

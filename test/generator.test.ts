@@ -3,6 +3,7 @@ import fs from 'fs';
 import { loadYaml, convertToOas3 } from '../src/oas';
 import * as helper from '../src/helper'
 import * as path from 'path';
+import OASNormalize from 'oas-normalize';
 
 
 import Handlebars from 'handlebars';
@@ -12,6 +13,7 @@ import Handlebars from 'handlebars';
 jest.mock('fs/promises');
 jest.mock('../src/helper');
 jest.mock('handlebars');
+jest.mock('oas-normalize');
 jest.mock('fs', () => ({
   promises: {
     readdir: jest.fn(),
@@ -24,6 +26,11 @@ jest.mock('../src/oas', () => ({
   loadYaml: jest.fn(),
   convertToOas3: jest.fn(),
 }));
+jest.mock('oas-normalize', () => {
+  return jest.fn().mockImplementation(() => ({
+    deref: jest.fn(),
+  }));
+});
 
 describe('Generator Class Tests', () => {
     let generator: Generator;
@@ -66,6 +73,26 @@ describe('Generator Class Tests', () => {
 
       });
 
+
+      describe('parseSpec', () => {
+        it('should parse and dereference OpenAPI spec', async () => {
+          const mockSpec = { openapi: '3.0.0' };
+          const mockOas = {
+            deref: jest.fn().mockResolvedValue(mockSpec),
+          };
+      
+          // Mock the OASNormalize constructor to return our mockOas object
+          (OASNormalize as any).mockImplementation(() => mockOas);
+      
+          const result = await generator.parseSpec('mock/file/path');
+      
+          expect(result).toEqual(mockSpec);
+          expect(OASNormalize).toHaveBeenCalledWith('mock/file/path', { enablePaths: true });
+          expect(mockOas.deref).toHaveBeenCalled();
+        });
+      });
+
+      
 
 
 

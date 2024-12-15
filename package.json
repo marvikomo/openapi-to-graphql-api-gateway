@@ -7,7 +7,7 @@
     "test": "jest",
     "build": "tsc && npm start",
     "dev": "nodemon server.ts",
-    "start": "node .dist/server.js",
+    "start": "ts-node src/schema-builder.ts",
     "docker:build": "docker-compose build",
     "docker:bash": "docker-compose up"
   },

@@ -91,9 +91,10 @@ class Generator {
     }
   }
 
+  //TODO: we need to make it support swagger 2.0 for now it supports 3.0 and above
   async parseSpec(path): Promise<any> {
-    const parsedSpec = loadYaml(path)
-    const convertedSpec = await convertToOas3(parsedSpec)
+    // const parsedSpec = loadYaml(path)
+    // const convertedSpec = await convertToOas3(parsedSpec)
     const oas = new OASNormalize(path, { enablePaths: true })
     return oas.deref()
   }
@@ -377,7 +378,7 @@ class Generator {
     if (!template) {
       throw new Error('No valid template')
     }
-    console.dir(groupedByTags, { depth: null, colors: true })
+   // console.dir(groupedByTags, { depth: null, colors: true })
     Object.entries(groupedByTags).forEach(([tag, paths]) => {
       //now we loop through the groupedByTags and get the tag and paths which is something like this for example
       // [
@@ -460,7 +461,7 @@ class Generator {
       }
 
       if (GenerationType.Resolver == generationType) {
-        schemaContent = template({
+          schemaContent = template({
           ServiceName: this.getServiceExportName(serviceId),
           serviceName: this.getServiceName(serviceId),
           serviceIdentifier: this.getServiceIdentifier(serviceId),
@@ -472,7 +473,7 @@ class Generator {
       }
 
       const filename = path.join(outputPath, `${tag}_${extension}`)
-      console.log('fileName', filename)
+     // console.log('fileName', filename)
       if (
         !checkIfFileExists(filename) ||
         readFile(filename) !== schemaContent
@@ -514,8 +515,8 @@ class Generator {
   async generateSchemaAndResolver(): Promise<void> {
     for (const file of this.specDirFiles) {
       const parsedSpec = await this.parseSpec(file)
-
-      //console.log('parsed spec', parsedSpec)
+      console.log('parsed file', file)
+      console.log('parsed spec', parsedSpec)
 
       const serviceId = parsedSpec['x-service-id']
       if (!serviceId)

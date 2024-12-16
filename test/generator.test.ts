@@ -496,6 +496,65 @@ describe('Generator Class Tests', () => {
           ]);
         });
 
+       //Complex Nested Objects with Arrays and Recursion
+        it('should handle complex schemas with nested objects, arrays, and recursion', () => {
+          const schema = {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                product: {
+                  type: 'object',
+                  properties: {
+                    productId: { type: 'string' },
+                    category: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer' },
+                        children: { type: 'array', items: { $ref: '#/components/schemas/Category' } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          };
+        
+          const generator = new Generator('/mock/spec/dir');
+          const result = generator.convertSchemaToGraphQLTypes(schema, 'RootObject');
+
+          console.dir(result, { depth: null, colors: true })
+        
+          expect(result).toEqual(
+            [
+              {
+                name: 'Category',
+                fields: [
+                  { name: 'id', type: 'Int', required: false },
+                  { name: 'children', type: '[Category]', required: false }
+                ]
+              },
+              {
+                name: 'Product',
+                fields: [
+                  { name: 'productId', type: 'String', required: false },
+                  { name: 'category', type: 'Category', required: false }
+                ]
+              },
+              {
+                name: 'RootObjectItem',
+                fields: [
+                  { name: 'id', type: 'String', required: false },
+                  { name: 'product', type: 'Product', required: false }
+                ]
+              },
+              { name: 'RootObject', aliasFor: '[RootObjectItem]' }
+            ]
+          );
+        });
+
+
 
 
      

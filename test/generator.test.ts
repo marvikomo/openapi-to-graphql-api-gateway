@@ -468,6 +468,34 @@ describe('Generator Class Tests', () => {
           ]);
         });
 
+        //Top-Level Array of Objects
+        it('should convert top-level arrays into an alias GraphQL type', () => {
+          const schema = {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                name: { type: 'string' },
+              },
+            },
+          };
+        
+          const generator = new Generator('/mock/spec/dir');
+          const result = generator.convertSchemaToGraphQLTypes(schema, 'RootObject');
+        
+          expect(result).toEqual([
+            {
+              name: 'RootObjectItem',
+              fields: [
+                { name: 'id', type: 'String', required: false },
+                { name: 'name', type: 'String', required: false },
+              ],
+            },
+            { name: 'RootObject', aliasFor: '[RootObjectItem]' },
+          ]);
+        });
+
 
 
      

@@ -330,6 +330,46 @@ describe('Generator Class Tests', () => {
             },
           ]);
         });
+
+
+        it('should convert nested objects into separate GraphQL types', () => {
+          const schema = {
+            type: 'object',
+            properties: {
+              user: {
+                type: 'object',
+                properties: {
+                  username: { type: 'string' },
+                  email: { type: 'string' },
+                },
+              },
+            },
+          };
+        
+          const generator = new Generator('/mock/spec/dir');
+          const result = generator.convertSchemaToGraphQLTypes(schema, 'RootObject');
+
+          console.dir(result, { depth: null, colors: true })
+
+        
+          expect(result).toEqual([
+            {
+              name: 'User',
+              fields: [
+                { name: 'username', type: 'String', required: false },
+                { name: 'email', type: 'String', required: false }
+              ]
+            },
+            {
+              name: 'RootObject',
+              fields: [ { name: 'user', type: 'User', required: false } ]
+            }
+          ]);
+        });
+
+
+
+
      
       });
     

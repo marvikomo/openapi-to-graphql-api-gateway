@@ -4,6 +4,15 @@ import { loadYaml, convertToOas3 } from '../src/oas';
 import * as helper from '../src/helper'
 import * as path from 'path';
 import OASNormalize from 'oas-normalize';
+import {
+  createFolder,
+  readFile,
+  writeFile,
+  checkIfFileExists,
+  toPascalCase,
+  toCamelCase,
+  removeServiceSuffix,
+} from '../src/helper';
 
 
 import Handlebars from 'handlebars';
@@ -129,6 +138,48 @@ describe('Generator Class Tests', () => {
           console.log("Grouped Output:", transformedGrouped)
 
           expect(transformedGrouped).toEqual({
+
+          })
+
+
+        })
+
+        it('should return {} when tag array is empty', () => {
+          const paths = {
+            '/path1': {
+              get: {
+                summary: 'This is get ops',
+                description: 'test test',
+                'x-visibility': 'public',
+                operationId: 'operation1',
+                tags: [],
+                responses: {
+
+                }
+              },
+            },
+            '/path2': {
+              post: { 
+                summary: 'This is post ops',
+                description: 'test test',
+                'x-visibility': 'public',
+                operationId: 'operation2',
+                tags: [],
+                responses: {
+
+                }
+               },
+            },
+          };
+
+          const grouped = generator.groupSpecPathsByTags(paths);
+
+          const transformedGrouped = Object.keys(grouped).reduce((acc, key) => {
+            acc[key] = grouped[key];
+            return acc;
+          }, {});
+
+          expect(transformedGrouped).toEqual({
             
           })
 
@@ -205,6 +256,83 @@ describe('Generator Class Tests', () => {
 
         });
       });
+
+
+      describe('generateGraphqlFoldersForService', () => {
+        it('should create required folders', () => {
+          (toPascalCase as jest.Mock).mockReturnValue('MockService');
+    
+          generator.generateGraphqlFoldersForService('mockService');
+    
+          expect(createFolder).toHaveBeenCalledWith(
+            expect.stringContaining('/queries/MockService')
+          );
+          expect(createFolder).toHaveBeenCalledWith(
+            expect.stringContaining('/resolvers/MockService')
+          );
+          expect(createFolder).toHaveBeenCalledWith(
+            expect.stringContaining('/services/MockService')
+          );
+        });
+      });
+
+
+      describe('convertSchemaToGraphQLTypes', () => {
+        it('should convert OpenAPI schema to GraphQL types', () => {
+          const schema = {
+            type: 'object',
+            properties: {
+              id: { type: 'integer' },
+              name: { type: 'string' },
+            },
+            required: ['id'],
+          };
+    
+          const types = generator.convertSchemaToGraphQLTypes(schema);
+    
+          expect(types).toEqual([
+            {
+              name: 'RootObject',
+              fields: [
+                { name: 'id', type: 'Int', required: true },
+                { name: 'name', type: 'String', required: false },
+              ],
+            },
+          ]);
+        });
+      });
+
+      describe('convertSchemaToGraphQLTypes', () => {
+
+        it('should convert scalar properties to GraphQL scalar types', () => {
+          const schema = {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              age: { type: 'integer' },
+              price: { type: 'number', format: 'float' },
+              isActive: { type: 'boolean' },
+            },
+          };
+        
+          const generator = new Generator('/mock/spec/dir');
+          const graphqlTypes = generator.convertSchemaToGraphQLTypes(schema, 'RootObject');
+        
+          expect(graphqlTypes).toEqual([
+            {
+              name: 'RootObject',
+              fields: [
+                { name: 'name', type: 'String', required: false },
+                { name: 'age', type: 'Int', required: false },
+                { name: 'price', type: 'Float', required: false },
+                { name: 'isActive', type: 'Boolean', required: false },
+              ],
+            },
+          ]);
+        });
+     
+      });
+    
     
 
 

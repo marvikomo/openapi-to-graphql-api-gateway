@@ -108,7 +108,6 @@ class Generator {
   }
 
   groupSpecPathsByTags = (paths) => {
-    console.log("grouped", paths)
     const groupedByTags = []
     Object.entries(paths).forEach(([path, methods]) => {
       Object.entries(methods).forEach(([method, details]) => {
@@ -126,7 +125,7 @@ class Generator {
       })
     })
 
-    console.log("groupedafter", groupedByTags)
+    //console.log("groupedafter", groupedByTags)
 
     return groupedByTags
   }
@@ -411,6 +410,13 @@ class Generator {
             responseSchema,
             responseTypeName,
           )
+          console.log("method")
+         //console.dir(methods.get.responses['200'].content['application/json'].schema.items.properties.product.properties.category, { depth: null, colors: true })
+          console.log("done")
+          //console.log("response schema", responseTypes)
+         // console.dir(methods.get.responses, { depth: null, colors: true })
+
+          console.log("stop.....")
           types.push(...responseTypes)
          // console.log('response types')
          // console.dir(responseTypes, { depth: null, colors: true })

@@ -430,7 +430,43 @@ describe('Generator Class Tests', () => {
           ]);
         });
 
+        // Recursive Object (Self-Referencing)
+        it('should handle recursive objects with self-referencing types', () => {
+          const schema = {
+            type: 'object',
+            properties: {
+              category: {
+                type: 'object',
+                properties: {
+                  id: { type: 'integer' },
+                  children: {
+                    type: 'array',
+                    items: { $ref: '#/components/schemas/Category' },
+                  },
+                },
+              },
+            },
+          };
+        
+          const generator = new Generator('/mock/spec/dir');
+          const result = generator.convertSchemaToGraphQLTypes(schema, 'RootObject');
 
+          console.dir(result, { depth: null, colors: true })
+        
+          expect(result).toEqual(  [
+            {
+              name: 'Category',
+              fields: [
+                { name: 'id', type: 'Int', required: false },
+                { name: 'children', type: '[Category]', required: false }
+              ]
+            },
+            {
+              name: 'RootObject',
+              fields: [ { name: 'category', type: 'Category', required: false } ]
+            }
+          ]);
+        });
 
 
 

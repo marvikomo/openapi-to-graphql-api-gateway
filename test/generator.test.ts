@@ -367,6 +367,31 @@ describe('Generator Class Tests', () => {
           ]);
         });
 
+        
+
+        it('should convert arrays of scalar fields to GraphQL list types', () => {
+          const schema = {
+            type: 'object',
+            properties: {
+              tags: { type: 'array', items: { type: 'string' } },
+              scores: { type: 'array', items: { type: 'integer' } },
+            },
+          };
+        
+          const generator = new Generator('/mock/spec/dir');
+          const result = generator.convertSchemaToGraphQLTypes(schema, 'RootObject');
+        
+          expect(result).toEqual([
+            {
+              name: 'RootObject',
+              fields: [
+                { name: 'tags', type: '[String]', required: false },
+                { name: 'scores', type: '[Int]', required: false },
+              ],
+            },
+          ]);
+        });
+
 
 
 

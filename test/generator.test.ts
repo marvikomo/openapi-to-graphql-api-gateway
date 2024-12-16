@@ -303,7 +303,7 @@ describe('Generator Class Tests', () => {
       });
 
       describe('convertSchemaToGraphQLTypes', () => {
-
+        //Single Scalar Field
         it('should convert scalar properties to GraphQL scalar types', () => {
           const schema = {
             type: 'object',
@@ -331,6 +331,7 @@ describe('Generator Class Tests', () => {
           ]);
         });
 
+        // Object with Nested Object
 
         it('should convert nested objects into separate GraphQL types', () => {
           const schema = {
@@ -367,9 +368,10 @@ describe('Generator Class Tests', () => {
           ]);
         });
 
-        
+       
+        //Object with Array of Scalars
 
-        it('should convert arrays of scalar fields to GraphQL list types', () => {
+      it('should convert arrays of scalar fields to GraphQL list types', () => {
           const schema = {
             type: 'object',
             properties: {
@@ -391,6 +393,43 @@ describe('Generator Class Tests', () => {
             },
           ]);
         });
+
+        //bject with Array of Objects
+        it('should convert arrays of objects into separate GraphQL types', () => {
+          const schema = {
+            type: 'object',
+            properties: {
+              products: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    productId: { type: 'string' },
+                    price: { type: 'number' },
+                  },
+                },
+              },
+            },
+          };
+        
+          const generator = new Generator('/mock/spec/dir');
+          const result = generator.convertSchemaToGraphQLTypes(schema, 'RootObject');
+         
+          expect(result).toEqual([
+            {
+              name: 'ProductsItem',
+              fields: [
+                { name: 'productId', type: 'String', required: false },
+                { name: 'price', type: 'Float', required: false }
+              ]
+            },
+            {
+              name: 'RootObject',
+              fields: [ { name: 'products', type: '[ProductsItem]', required: false } ]
+            }
+          ]);
+        });
+
 
 
 

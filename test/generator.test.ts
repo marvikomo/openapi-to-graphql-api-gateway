@@ -561,7 +561,7 @@ describe('Generator Class Tests', () => {
      
       });
     
-      describe('', ()=> {
+      describe('testUUID', ()=> {
         it('should handle arrays of UUIDs correctly', () => {
           const schema = {
             type: 'object',
@@ -593,11 +593,46 @@ describe('Generator Class Tests', () => {
             },
           ]);
         });
+
+        it('should handle UUIDs in nested objects correctly', () => {
+          const schema = {
+            type: 'object',
+            properties: {
+              user: {
+                type: 'object',
+                properties: {
+                  id: {
+                    type: 'string',
+                    format: 'uuid',
+                  },
+                  profileId: {
+                    type: 'string',
+                    format: 'uuid',
+                  },
+                },
+              },
+            },
+          };
+        
+          const generator = new Generator('/mock/spec/dir');
+          const result = generator.convertSchemaToGraphQLTypes(schema, 'RootObject');
+        
+  
+          expect(result).toEqual([
+            {
+              name: 'User',
+              fields: [
+                { name: 'id', type: 'String', required: false },
+                { name: 'profileId', type: 'String', required: false },
+              ],
+            },
+            {
+              name: 'RootObject',
+              fields: [{ name: 'user', type: 'User', required: false }],
+            },
+          ]);
+        });
       })
-
-
-
-
 
 })
 

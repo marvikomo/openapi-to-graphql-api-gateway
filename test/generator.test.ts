@@ -561,7 +561,39 @@ describe('Generator Class Tests', () => {
      
       });
     
-    
+      describe('', ()=> {
+        it('should handle arrays of UUIDs correctly', () => {
+          const schema = {
+            type: 'object',
+            properties: {
+              userIds: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  format: 'uuid',
+                  example: '3a5aaea8-504a-4404-ad3d-b82574fba5e5',
+                },
+              },
+            },
+          };
+        
+          const generator = new Generator('/mock/spec/dir');
+          const result = generator.convertSchemaToGraphQLTypes(schema, 'RootObject');
+        
+          expect(result).toEqual([
+            {
+              name: 'RootObject',
+              fields: [
+                {
+                  name: 'userIds',
+                  type: '[String]', // Array of UUIDs map to "[String]"
+                  required: false,
+                },
+              ],
+            },
+          ]);
+        });
+      })
 
 
 

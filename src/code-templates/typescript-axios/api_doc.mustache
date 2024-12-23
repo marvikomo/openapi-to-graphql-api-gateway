@@ -1,0 +1,67 @@
+## {{moduleName}}.{{classname}}{{#description}}
+{{.}}{{/description}}
+
+{{#operations}}
+{{#operation}}
+### {{operationId}}
+
+> {{#returnType}}{{.}} {{/returnType}}{{operationId}}({{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}})
+
+{{summary}}{{#notes}}
+
+{{.}}{{/notes}}
+
+**Example**
+For details about `config` object, see the section on [Client Configuration](#api-client-configuration)
+
+```typescript
+import {{{moduleName}}} from '{{{npmName}}}';
+import {config} from './path/to/config.ts';
+
+const apiInstance = new {{{moduleName}}}.{{{classname}}}(config);
+{{#requiredParams}}{{#isBodyParam}}
+const {{{paramName}}} : {{moduleName}}.{{dataType}} = { /* fields */ };// see fields {{moduleName}}.{{dataType}}{{/isBodyParam}}{{^isBodyParam}}
+const {{{paramName}}} = '{{{example}}}'; // {{{dataType}}} | {{{description}}}{{/isBodyParam}}
+{{/requiredParams}}
+{{#optionalParams}}
+{{#-first}}
+const opts = {
+{{/-first}}
+  '{{{paramName}}}': '{{{example}}}'{{^-last}},{{/-last}} // {{{dataType}}} | {{{description}}}
+{{#-last}}
+};
+{{/-last}}
+{{/optionalParams}}
+
+apiInstance.{{{operationId}}}({{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}}).then(({{#returnType}}{data}{{/returnType}}) => { {{#returnType}}
+   // data is an instance of {{{moduleName}}}.{{{.}}}{{/returnType}}
+  {{#returnType}}console.log('API called successfully. Returned data: ' + data);{{/returnType}}{{^returnType}}console.log('API called successfully.');{{/returnType}}
+}, (error) => {
+  console.error(error);
+});
+```
+
+**Parameters**
+
+{{^allParams}}This endpoint does not need any parameter.{{/allParams}}{{#allParams}}{{#-last}}
+Name | Type | Location | Description  | Notes
+------------- | ------------- | ------------- | ------------- | -------------{{/-last}}{{/allParams}}
+{{#allParams}} **{{paramName}}** | {{#isPrimitiveType}}**{{dataType}}**{{/isPrimitiveType}}{{^isPrimitiveType}}{{#isFile}}**{{dataType}}**{{/isFile}}{{^isFile}}[**{{dataType}}**](#{{moduleName}}{{baseType}}){{/isFile}}{{/isPrimitiveType}}|{{#isHeaderParam}}header{{/isHeaderParam}}{{#isCookieParam}}cookie{{/isCookieParam}}{{#isPathParam}}path{{/isPathParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isBodyParam}}body{{/isBodyParam}}| {{description}} | {{^required}}[optional] {{/required}}{{#defaultValue}}[default to {{.}}]{{/defaultValue}}
+{{/allParams}}
+
+
+**Return Type**
+
+{{#returnType}}{{#returnTypeIsPrimitive}}**{{returnType}}**{{/returnTypeIsPrimitive}}{{^returnTypeIsPrimitive}}[**{{returnType}}**](#{{moduleName}}{{returnBaseType}}){{/returnTypeIsPrimitive}}{{/returnType}}{{^returnType}}null (empty response body){{/returnType}}
+
+**Authorization**
+
+{{^authMethods}}No authorization required{{/authMethods}}{{#authMethods}}[{{name}}](#{{name}}){{^-last}}, {{/-last}}{{/authMethods}}
+
+**HTTP request headers**
+
+- **Content-Type**: {{#consumes}}{{{mediaType}}}{{^-last}}, {{/-last}}{{/consumes}}{{^consumes}}Not defined{{/consumes}}
+- **Accept**: {{#produces}}{{{mediaType}}}{{^-last}}, {{/-last}}{{/produces}}{{^produces}}Not defined{{/produces}}
+
+{{/operation}}
+{{/operations}}

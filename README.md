@@ -25,4 +25,20 @@
 - OpenAPI 3.x specifications (from your microservices)
 
 
+🤝 Contributing
+We welcome contributions! Follow these steps:
+
+Fork the repository.
+
+Create a branch: git checkout -b feature/your-feature.
+
+Commit changes: git commit -m 'Add some feature'.
+
+Push to the branch: git push origin feature/your-feature.
+
+Open a Pull Request.
+
+See CONTRIBUTING.md for details.
+
+
 

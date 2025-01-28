@@ -25,7 +25,7 @@
 - OpenAPI 3.x specifications (from your microservices)
 
 
-🤝 Contributing
+## 🤝 Contributing
 We welcome contributions! Follow these steps:
 
 Fork the repository.

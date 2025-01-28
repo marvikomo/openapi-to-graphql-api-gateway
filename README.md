@@ -41,4 +41,8 @@ Open a Pull Request.
 See CONTRIBUTING.md for details.
 
 
+## 🙌 Acknowledgments
+Inspired by GraphQL Mesh and OpenAPI-to-GraphQL.
+
+Built with Apollo Server and Swagger Parser.
 

@@ -1,37 +1,48 @@
-# OpenAPI to GraphQL API Gateway
+# OpenAPI-to-GraphQL API Gateway 🚀
 
-## Overview
+**Automatically generate and deploy a unified GraphQL API from OpenAPI-enabled microservices.**  
+*Dynamically stitch REST APIs into a single GraphQL endpoint with zero manual intervention.*
 
-The **OpenAPI to GraphQL API Gateway** is a tool designed to convert OpenAPI specifications into a GraphQL-based API. 
-It serves as an intermediary gateway, transforming GraphQL queries and mutations into RESTful API calls defined in OpenAPI specs, 
-and vice versa. This project simplifies the process of adopting GraphQL for existing REST APIs without the need for a complete backend rewrite.
-
----
-
-## Features
-
-- **Automatic GraphQL Schema Generation**:
-  - Converts OpenAPI specs into GraphQL schemas.
-  - Automatically generates queries and resolvers using templates.
-- **Seamless Integration**:
-  - Acts as an API Gateway, bridging GraphQL clients with REST APIs.
-- **Customizable Templates**:
-  - Modify query and resolver templates for tailored GraphQL generation.
-- **Logging and Monitoring**:
-  - Built-in logging for better debugging and observability.
-- **Scalable**:
-  - Supports multiple OpenAPI specifications.
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Documentation](https://img)](docs/OVERVIEW.md)
 
 ---
 
-## Installation
+## ✨ Features
+
+- **Auto-Discovery**: Detects OpenAPI specs from deployed services and dynamically updates the GraphQL schema.
+- **Schema Federation**: Stitch multiple REST APIs into a single GraphQL endpoint using Apollo Federation.
+- **CI/CD Ready**: Integrates with GitHub Actions, GitLab CI, or Jenkins for seamless redeployment.
+- **Security First**: Translates OpenAPI security schemes (OAuth2, API keys) into GraphQL directives.
+- **Performance**: Query batching, caching, and distributed tracing for optimized requests.
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- **Node.js** (v16 or later)
-- **Yarn** or **npm**
-- OpenAPI specification file (YAML or JSON)
+- Node.js 18+ or Docker
+- OpenAPI 3.x specifications (from your microservices)
 
-### Clone the Repository
-```bash
-git clone https://github.com/marvikomo/openapi-to-graphql-api-gateway.git
-cd openapi-to-graphql-api-gateway
+
+## 🤝 Contributing
+We welcome contributions! Follow these steps:
+
+Fork the repository.
+
+Create a branch: git checkout -b feature/your-feature.
+
+Commit changes: git commit -m 'Add some feature'.
+
+Push to the branch: git push origin feature/your-feature.
+
+Open a Pull Request.
+
+See CONTRIBUTING.md for details.
+
+
+## 🙌 Acknowledgments
+Inspired by GraphQL Mesh and OpenAPI-to-GraphQL.
+
+Built with Apollo Server and Swagger Parser.
+

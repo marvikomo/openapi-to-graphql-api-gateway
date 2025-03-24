@@ -1,4 +1,3 @@
-
 export function getEntries<T>(obj: ArrayLike<T> | Record<string, T>, alphabetize?: boolean) {
     let entries = Object.entries(obj);
 
@@ -10,6 +9,6 @@ export function getEntries<T>(obj: ArrayLike<T> | Record<string, T>, alphabetize
 }
 
 
-export function resolveRef<T> ( schema: any, ref: string): T | undefined {
-   
+export function resolveRef<T>(schema: any, ref: string): T | undefined {
+    return undefined;
 }

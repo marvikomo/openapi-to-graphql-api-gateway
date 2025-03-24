@@ -1,0 +1,62 @@
+/** @format */
+
+import di from  "../../config/di";
+import { {{ServiceName}} } from "{{servicePath}}";
+const  {{serviceName}}: {{ServiceName}} = di.get("{{serviceIdentifier}}");
+
+const {{tag}}Resolvers = {
+  Query: {
+     {{#each queries}}
+      {{this.name}}(_: any, {}, {}) {
+      
+      return {{../serviceName}}.{{this.name}}(currentUser);
+    },
+        {{/each}}
+  },
+  Mutation: {
+    {{#each mutations}}
+    {{this.name}}(_: any) {
+      return {{../serviceName}}.{{name}}(currentUser);
+    },
+    {{/each}}
+  },
+};
+
+export default {{tag}}Resolvers;
+
+
+{{!-- /** @format */
+
+import di from  "../../config/di";
+import { {{ServiceName}} } from "{{servicePath}}";
+const  {{serviceName}}: {{ServiceName}} = di.get("{{serviceIdentifier}}");
+
+const {{tag}}Resolvers = {
+  Query: {
+     {{#each queries}}
+      {{this.name}}(_: any, args: { {{#each this.arguments}}{{this.name}}: {{this.type}}{{#unless @last}}, {{/unless}}{{/each}} }, context: any) {
+        return {{../serviceName}}.{{this.name}}(
+          {{#if this.arguments}}
+          args,
+          {{/if}}
+          context.currentUser
+        );
+      },
+    {{/each}}
+  },
+  Mutation: {
+    {{#each mutations}}
+    {{this.name}}(_: any, { input{{#if this.arguments}}, args{{/if}} }: { input: {{this.inputType}}{{#if this.arguments}}, args: { {{#each this.arguments}}{{this.name}}: {{this.type}}{{#unless @last}}, {{/unless}}{{/each}} }{{/if}} }, context: any) {
+      return {{../serviceName}}.{{this.name}}(
+        input,
+        {{#if this.arguments}}
+        args,
+        {{/if}}
+        context.currentUser
+      );
+    },
+    {{/each}}
+  },
+};
+
+export default {{tag}}Resolvers; --}}

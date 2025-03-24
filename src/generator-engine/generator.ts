@@ -634,6 +634,7 @@ class Generator {
    * Generate GraphQL schema and resolver files for all OpenAPI specifications
    */
   async generateSchemaAndResolver(): Promise<void> {
+    //Read spec files
     if (this.specDirFiles.length === 0) {
       await this.readFilesInDirectory();
     }

@@ -124,13 +124,15 @@ const TEMPLATES = {
 class Generator {
   private specDir: string;
   private specDirFiles: string[];
+  private outputDir: string;
 
   /**
    * @param specDir Directory containing OpenAPI specification files
    */
-  constructor(specDir: string) {
+  constructor(specDir: string, config: GeneratorConfig = {}) {
     this.specDir = specDir;
     this.specDirFiles = [];
+    this.outputDir = config.outputDir || '../app';
   }
 
   /**
@@ -214,7 +216,7 @@ class Generator {
    * @returns Path to GraphQL queries directory
    */
   private getQueryPath(): string {
-    return '../app/graphql/queries/';
+    return path.join(this.outputDir, 'graphql/queries/');
   }
 
   /**
@@ -222,7 +224,7 @@ class Generator {
    * @returns Path to GraphQL resolvers directory
    */
   private getResolverPath(): string {
-    return '../app/graphql/resolvers/';
+    return path.join(this.outputDir, 'graphql/resolvers/');
   }
 
   /**
@@ -230,9 +232,19 @@ class Generator {
    * @returns Path to services directory
    */
   private getServicePath(): string {
-    return '../app/services/';
+    return path.join(this.outputDir, 'services/');
   }
 
+   /**
+   * Set the base output directory for all generated files
+   * @param outputDir Base directory for generated files
+   */
+   public setOutputDirectory(outputDir: string): void {
+    if (outputDir) {
+      this.outputDir = outputDir;
+    }
+  }
+  
   /**
    * Get the output path for queries for a specific service
    * @param serviceId Service identifier

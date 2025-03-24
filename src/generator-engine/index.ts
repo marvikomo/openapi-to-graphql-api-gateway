@@ -9,7 +9,10 @@ import Generator from "./generator"
 
 
 const convert = async () => {
-    const generate = new Generator(path.join(__dirname, '../specs'))
+    const generate = new Generator(path.join(__dirname, '../specs'), {
+      /** Base output directory for all generated files */
+      outputDir: '../../gen'
+    })
     await generate.readFilesInDirectory();
     await generate.generateSchemaAndResolver(); 
 }

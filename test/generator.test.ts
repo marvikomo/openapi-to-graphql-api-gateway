@@ -1,7 +1,7 @@
-import Generator from "../src/generator";
+import Generator from "../src/generator-engine/generator";
 import fs from 'fs';
-import { loadYaml, convertToOas3 } from '../src/oas';
-import * as helper from '../src/helper'
+import { loadYaml, convertToOas3 } from '../src/generator-engine/oas';
+import * as helper from '../src/generator-engine/helper'
 import * as path from 'path';
 import OASNormalize from 'oas-normalize';
 import {
@@ -12,7 +12,7 @@ import {
   toPascalCase,
   toCamelCase,
   removeServiceSuffix,
-} from '../src/helper';
+} from '../src/generator-engine/helper';
 
 
 import Handlebars from 'handlebars';

@@ -97,6 +97,19 @@ interface GraphQLOperation {
   }>;
 }
 
+
+/**
+ * Configuration options for the Generator
+ */
+interface GeneratorConfig {
+  /** Base path for generated query files */
+  queryBasePath?: string;
+  /** Base path for generated resolver files */
+  resolverBasePath?: string;
+  /** Base path for generated service files */
+  serviceBasePath?: string;
+}
+
 // Enums
 enum GenerationType {
   Query = 'Query',

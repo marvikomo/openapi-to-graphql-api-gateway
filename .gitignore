@@ -3,4 +3,4 @@ node_modules
 /app/services                                                                                                                          
 /coverage
 /src/generator-engine/test.ts
-/src/generator-engine/app
+/src/app

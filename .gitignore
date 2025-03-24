@@ -2,3 +2,4 @@ node_modules
 /app/graphql    
 /app/services                                                                                                                          
 /coverage
+/src/generator-engine/test.ts
